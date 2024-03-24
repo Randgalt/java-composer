@@ -8,4 +8,6 @@ Please see [JavaPoet](https://github.com/square/javapoet) for documentation, lic
 
 # Changes From JavaPoet
 
+### March 24, 2024
 - Require Java 17
+- Add record support from https://github.com/square/javapoet/pull/981
