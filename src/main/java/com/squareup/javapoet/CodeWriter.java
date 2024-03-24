@@ -15,6 +15,10 @@
  */
 package com.squareup.javapoet;
 
+/*
+  modifications made by Jordan Zimmerman et al for the purposes of post Java 8 support
+ */
+
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Modifier;
 
@@ -180,7 +184,7 @@ final class CodeWriter {
     if (modifiers.isEmpty()) return;
     for (Modifier modifier : EnumSet.copyOf(modifiers)) {
       if (implicitModifiers.contains(modifier)) continue;
-      emitAndIndent(modifier.name().toLowerCase(Locale.US));
+      emitAndIndent(modifier.toString().toLowerCase(Locale.US));
       emitAndIndent(" ");
     }
   }

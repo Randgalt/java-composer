@@ -83,6 +83,65 @@ public final class TypeSpecTest {
     assertEquals(472949424, taco.hashCode()); // update expected number if source changes
   }
 
+  @Test public void sealedClass() {
+    TypeSpec taco = TypeSpec.classBuilder("Taco")
+        .addModifiers(Modifier.SEALED)
+        .build();
+    assertThat(toString(taco)).isEqualTo(""
+        + "package com.squareup.tacos;\n"
+        + "\n"
+        + "sealed class Taco {\n"
+        + "}\n");
+    assertEquals(-1312785161, taco.hashCode()); // update expected number if source changes
+  }
+
+  @Test public void nonSealedClass() {
+    TypeSpec taco = TypeSpec.classBuilder("Taco")
+        .addModifiers(Modifier.NON_SEALED)
+        .build();
+    assertThat(toString(taco)).isEqualTo(""
+        + "package com.squareup.tacos;\n"
+        + "\n"
+        + "non-sealed class Taco {\n"
+        + "}\n");
+    assertEquals(561441783, taco.hashCode()); // update expected number if source changes
+  }
+
+  @Test public void sealedInterface() {
+    TypeSpec taco = TypeSpec.interfaceBuilder("Taco")
+        .addModifiers(Modifier.SEALED)
+        .addPermits(ClassName.get("bobo", "Baba"))
+        .build();
+    assertThat(toString(taco)).isEqualTo(""
+        + "package com.squareup.tacos;\n"
+        + "\n"
+        + "import bobo.Baba;\n"
+        + "\n"
+        + "sealed interface Taco permits Baba {\n"
+        + "}\n");
+    assertEquals(126258766, taco.hashCode()); // update expected number if source changes
+  }
+
+  @Test public void disallowSealedMethods() {
+    try {
+      TypeSpec.classBuilder("Roshambo")
+              .addMethod(MethodSpec.methodBuilder("doom").addModifiers(Modifier.SEALED).build())
+              .build();
+      fail();
+    } catch (IllegalStateException expected) {
+    }
+  }
+
+  @Test public void disallowSealedFields() {
+    try {
+      TypeSpec.classBuilder("Roshambo")
+              .addField(FieldSpec.builder(TypeName.CHAR, "hey", Modifier.NON_SEALED).build())
+              .build();
+      fail();
+    } catch (IllegalStateException expected) {
+    }
+  }
+
   @Test public void interestingTypes() throws Exception {
     TypeName listOfAny = ParameterizedTypeName.get(
         ClassName.get(List.class), WildcardTypeName.subtypeOf(Object.class));
