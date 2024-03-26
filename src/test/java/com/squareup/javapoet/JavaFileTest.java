@@ -15,17 +15,8 @@
  */
 package com.squareup.javapoet;
 
-import com.google.testing.compile.CompilationRule;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
-
-import javax.lang.model.element.Modifier;
-import javax.lang.model.element.TypeElement;
-
 import java.io.File;
+import com.google.testing.compile.CompilationRule;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
@@ -33,6 +24,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
+import javax.lang.model.element.Modifier;
+import javax.lang.model.element.TypeElement;
+import org.junit.Ignore;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.JUnit4;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -285,6 +283,26 @@ public final class JavaFileTest {
         + "class Taco {\n"
         + "  Date madeFreshDate;\n"
         + "}\n");
+  }
+
+  @Test
+  public void recordNoField() {
+      String source = JavaFile.builder("com.squareup.tacos", TypeSpec.recordBuilder("Taco").build())
+              .skipJavaLangImports(true).build().toString();
+      assertThat(source).isEqualTo(
+              "" + "package com.squareup.tacos;\n" + "\n" + "record Taco() {\n" + "}\n" + "");
+  }
+
+  @Test
+  public void recordTwoField() {
+      String source = JavaFile
+              .builder("com.squareup.tacos",
+                      TypeSpec.recordBuilder("Taco")
+                              .addField(FieldSpec.builder(String.class, "name").build())
+                              .addField(FieldSpec.builder(Integer.class, "code").build()).build())
+              .skipJavaLangImports(true).build().toString();
+      assertThat(source).isEqualTo("" + "package com.squareup.tacos;\n" + "\n"
+              + "record Taco(String name, Integer code) {\n" + "}\n" + "");
   }
 
   @Test public void conflictingImports() throws Exception {
