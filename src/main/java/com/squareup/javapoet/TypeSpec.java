@@ -55,6 +55,7 @@ public final class TypeSpec {
   public final List<TypeVariableName> typeVariables;
   public final TypeName superclass;
   public final List<TypeName> superinterfaces;
+  public final List<TypeName> permits;
   public final Map<String, TypeSpec> enumConstants;
   public final List<FieldSpec> fieldSpecs;
   public final CodeBlock staticBlock;
@@ -75,6 +76,7 @@ public final class TypeSpec {
     this.typeVariables = Util.immutableList(builder.typeVariables);
     this.superclass = builder.superclass;
     this.superinterfaces = Util.immutableList(builder.superinterfaces);
+    this.permits = Util.immutableList(builder.permits);
     this.enumConstants = Util.immutableMap(builder.enumConstants);
     this.fieldSpecs = Util.immutableList(builder.fieldSpecs);
     this.staticBlock = builder.staticBlock.build();
@@ -109,6 +111,7 @@ public final class TypeSpec {
     this.typeVariables = Collections.emptyList();
     this.superclass = null;
     this.superinterfaces = Collections.emptyList();
+    this.permits = Collections.emptyList();
     this.enumConstants = Collections.emptyMap();
     this.fieldSpecs = Collections.emptyList();
     this.staticBlock = type.staticBlock;
@@ -181,6 +184,7 @@ public final class TypeSpec {
     builder.typeVariables.addAll(typeVariables);
     builder.superclass = superclass;
     builder.superinterfaces.addAll(superinterfaces);
+    builder.permits.addAll(permits);
     builder.enumConstants.putAll(enumConstants);
     builder.fieldSpecs.addAll(fieldSpecs);
     builder.methodSpecs.addAll(methodSpecs);
@@ -278,6 +282,16 @@ public final class TypeSpec {
           codeWriter.emit(" implements");
           boolean firstType = true;
           for (TypeName type : implementsTypes) {
+            if (!firstType) codeWriter.emit(",");
+            codeWriter.emit(" $T", type);
+            firstType = false;
+          }
+        }
+
+        if (!permits.isEmpty()) {
+          codeWriter.emit(" permits");
+          boolean firstType = true;
+          for (TypeName type : permits) {
             if (!firstType) codeWriter.emit(",");
             codeWriter.emit(" $T", type);
             firstType = false;
@@ -460,6 +474,7 @@ public final class TypeSpec {
     public final List<Modifier> modifiers = new ArrayList<>();
     public final List<TypeVariableName> typeVariables = new ArrayList<>();
     public final List<TypeName> superinterfaces = new ArrayList<>();
+    public final List<TypeName> permits = new ArrayList<>();
     public final List<FieldSpec> fieldSpecs = new ArrayList<>();
     public final List<MethodSpec> methodSpecs = new ArrayList<>();
     public final List<TypeSpec> typeSpecs = new ArrayList<>();
@@ -584,6 +599,35 @@ public final class TypeSpec {
       addSuperinterface(TypeName.get(superinterface));
       if (avoidNestedTypeNameClashes) {
         Class<?> clazz = getRawType(superinterface);
+        if (clazz != null) {
+          avoidClashesWithNestedClasses(clazz);
+        }
+      }
+      return this;
+    }
+
+    public Builder addPermits(Iterable<? extends TypeName> permits) {
+      checkArgument(permits != null, "permits == null");
+      for (TypeName permit : permits) {
+        addPermits(permits);
+      }
+      return this;
+    }
+
+    public Builder addPermits(TypeName permits) {
+      checkArgument(permits != null, "permits == null");
+      this.permits.add(permits);
+      return this;
+    }
+
+    public Builder addPermits(Type permits) {
+      return addPermits(permits, true);
+    }
+
+    public Builder addPermits(Type permits, boolean avoidNestedTypeNameClashes) {
+      addPermits(TypeName.get(permits));
+      if (avoidNestedTypeNameClashes) {
+        Class<?> clazz = getRawType(permits);
         if (clazz != null) {
           avoidClashesWithNestedClasses(clazz);
         }
@@ -806,6 +850,10 @@ public final class TypeSpec {
         checkArgument(superinterface != null, "superinterfaces contains null");
       }
 
+      for (TypeName permit : permits) {
+        checkArgument(permit != null, "permits contains null");
+      }
+
       if (!typeVariables.isEmpty()) {
         checkState(anonymousTypeArguments == null,
             "typevariables are forbidden on anonymous types.");
@@ -828,6 +876,8 @@ public final class TypeSpec {
           checkState(fieldSpec.modifiers.containsAll(check), "%s %s.%s requires modifiers %s",
               kind, name, fieldSpec.name, check);
         }
+        checkState(!fieldSpec.hasModifier(Modifier.SEALED) && !fieldSpec.hasModifier(Modifier.NON_SEALED), "%s %s.%s cannot have modifiers %s or %s",
+                kind, name, fieldSpec.name, Modifier.SEALED, Modifier.NON_SEALED);
       }
 
       for (MethodSpec methodSpec : methodSpecs) {
@@ -855,6 +905,8 @@ public final class TypeSpec {
           checkState(!methodSpec.hasModifier(Modifier.DEFAULT), "%s %s.%s cannot be default",
               kind, name, methodSpec.name);
         }
+        checkState(!methodSpec.hasModifier(Modifier.SEALED) && !methodSpec.hasModifier(Modifier.NON_SEALED), "%s %s.%s cannot have modifiers %s or %s",
+                kind, name, methodSpec.name, Modifier.SEALED, Modifier.NON_SEALED);
       }
 
       for (TypeSpec typeSpec : typeSpecs) {
