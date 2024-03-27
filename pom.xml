@@ -35,6 +35,61 @@
         <compile-testing.version>0.21.0</compile-testing.version>
     </properties>
 
+    <name>Java Composer</name>
+    <description>Fork of JavaPoet with updates for post-Java 8</description>
+    <url>https://github.com/randgalt/java-composer</url>
+    <inceptionYear>2024</inceptionYear>
+
+    <organization>
+        <name>Java Composer</name>
+        <url>https://github.com/Randgalt/java-composer</url>
+    </organization>
+
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>Jordan Zimmerman</name>
+            <email>jordan@jordanzimmerman.com</email>
+            <timezone>-5</timezone>
+            <url>https://github.com/randgalt/</url>
+            <roles>
+                <role>Author</role>
+            </roles>
+        </developer>
+    </developers>
+
+    <scm>
+        <url>https://github.com/randgalt/java-composer</url>
+        <connection>scm:git:https://github.com/randgalt/java-composer.git</connection>
+        <developerConnection>scm:git:git@github.com:randgalt/java-composer.git</developerConnection>
+        <tag>HEAD</tag>
+    </scm>
+
+    <issueManagement>
+        <system>Github</system>
+        <url>https://github.com/randgalt/java-composer/issues</url>
+    </issueManagement>
+
+    <distributionManagement>
+        <repository>
+            <id>sonatype-nexus-staging</id>
+            <name>Sonatype Nexus Staging</name>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
+        </repository>
+        <snapshotRepository>
+            <id>sonatype-nexus-snapshots</id>
+            <name>Sonatype Nexus Snapshots</name>
+            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
+
     <dependencies>
         <dependency>
             <groupId>org.eclipse.jdt.core.compiler</groupId>
