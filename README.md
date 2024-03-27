@@ -9,6 +9,12 @@ chooses to reactivate.
 
 Please see [JavaPoet](https://github.com/square/javapoet) for documentation, licensing, etc.
 
+```xml
+    <groupId>io.soabase.java-composer</groupId>
+    <artifactId>java-composer</artifactId>
+    <version>VERSION</version>
+```
+
 # Changes From JavaPoet
 
 ### March 26, 2024
