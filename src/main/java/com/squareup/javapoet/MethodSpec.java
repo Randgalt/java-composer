@@ -35,6 +35,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.squareup.javapoet.Util.checkArgument;
 import static com.squareup.javapoet.Util.checkNotNull;
@@ -529,6 +530,77 @@ public final class MethodSpec {
 
     public Builder addStatement(CodeBlock codeBlock) {
       code.addStatement(codeBlock);
+      return this;
+    }
+
+    /**
+     * Structures a lambda expression containing a body,
+     * and not only an expression.
+     * @param parameters the input parameters of the function.
+     * @param body the body of the function.
+     * Should be used with addCode(), to provide specific behaviour such as
+     * methodcall((int x, int y) -> {return x + y;}, 5).
+     */
+    public Builder addLambda(List<ParameterSpec> parameters, CodeBlock body) {
+      // check that the input types are valid
+      for (ParameterSpec parameter : parameters) {
+        checkArgument(!parameter.type.equals(TypeName.VOID),
+          "lambda input parameters cannot be of void type!");
+      }
+
+      // the inputs of the lambda (left side)
+      String inputSide = String.join(
+        ", ", parameters.stream()
+        .map(p -> p.toString())
+        .collect(Collectors.toList())
+      );
+
+      // the body of the lambda (right side)
+      String bodySide = body.toString().replaceAll("\n$", "");
+
+      // the full lambda structure
+      code.add("(" + inputSide + ") -> {" + bodySide + "}");
+      return this;
+    }
+
+    /**
+     * Structures a lambda expression containing an expression.
+     * @param parameters the input parameters of the function.
+     * @param expressionFromat the format that should be used
+     * for the expression.
+     * @param args the values that should be placed in the holders
+     * of the format.
+     * Should be used with addCode(), to provide specific behaviour such as
+     * methodcall((int x, int y) -> x + y, 5).
+     */
+    public Builder addLambda(List<ParameterSpec> parameters, String expressionFromat, Object... args) {
+      addLambda(parameters, CodeBlock.of("return " + expressionFromat + ";", args));
+      return this;
+    }
+
+    /**
+     * Structures a producer lambda expression containing a body,
+     * and not only an expression.
+     * @param body the body of the lambda
+     * Should be used with addCode(), to provide specific behaviour such as
+     * methodcall(() -> {return x + y;}, 5).
+     */
+    public Builder addLambda(CodeBlock body) {
+      addLambda(Collections.emptyList(), body);
+      return this;
+    }
+
+    /**
+     * Structures a producer lambda expression containing an expression.
+     * @param expressionFromat the format that should be used
+     * for the expression.
+     * @param args the values that should be placed in the holders
+     * of the format.
+     * Should be used with addCode(), to provide specific behaviour such as
+     * methodcall(() -> x + y, 5).
+     */
+    public Builder addLambda(String expressionFromat, Object... args) {
+      addLambda(Collections.emptyList(), expressionFromat, args);
       return this;
     }
 
