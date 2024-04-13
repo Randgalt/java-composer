@@ -296,21 +296,25 @@ public final class MethodSpec {
     private String name;
 
     private final CodeBlock.Builder javadoc = CodeBlock.builder();
-    private TypeName returnType;
-    private final Set<TypeName> exceptions = new LinkedHashSet<>();
-    private final CodeBlock.Builder code = CodeBlock.builder();
-    private boolean varargs;
-    private CodeBlock defaultValue;
-
-    public final List<TypeVariableName> typeVariables = new ArrayList<>();
     public final List<AnnotationSpec> annotations = new ArrayList<>();
     public final List<Modifier> modifiers = new ArrayList<>();
+    public final List<TypeVariableName> typeVariables = new ArrayList<>();
+    private TypeName returnType;
     public final List<ParameterSpec> parameters = new ArrayList<>();
+    private boolean varargs;
+    private final Set<TypeName> exceptions = new LinkedHashSet<>();
+    private final CodeBlock.Builder code = CodeBlock.builder();
+    private CodeBlock defaultValue;
+
 
     private Builder(String name) {
       setName(name);
     }
 
+    /**
+     * Sets a name for this builder.
+     * @param name the name to be set for the method.
+     */
     public Builder setName(String name) {
       checkNotNull(name, "name == null");
       checkArgument(name.equals(CONSTRUCTOR) || SourceVersion.isName(name),
@@ -500,6 +504,10 @@ public final class MethodSpec {
       return nextControlFlow("$L", codeBlock);
     }
 
+    /**
+     * Ends the last open control flow.
+     * Should be used once for every control flow.
+     */
     public Builder endControlFlow() {
       code.endControlFlow();
       return this;
@@ -529,6 +537,98 @@ public final class MethodSpec {
 
     public Builder addStatement(CodeBlock codeBlock) {
       code.addStatement(codeBlock);
+      return this;
+    }
+
+    /**
+     * Structures a lambda function based on some inputs and a CodeBlock body.<br>
+     * Should be used with {@link #addCode(String, Object...) addCode},
+     * to provide specific behaviour such as
+     * <b>methodcall((int x, int y) -> x + y, 5)</b>.
+     * @param parameters the input parameters of the function.
+     * @param emitTypes true if the types of the inputs should
+     * be emitted on the result.
+     * @param body the body of the function.
+     */
+    public Builder addLambda(Iterable<ParameterSpec> parameters, boolean emitTypes, CodeBlock body) {
+      code.addLambda(parameters, emitTypes, body);
+      return this;
+    }
+
+    /**
+     * Structures a lambda function based on some inputs and a CodeBlock body.<br>
+     * Will not emit the input types.<br>
+     * Should be used with {@link #addCode(String, Object...) addCode},
+     * to provide specific behaviour such as
+     * <b>methodcall((x, y) -> x + y, 5)</b>.
+     * @param parameters the input parameters of the function.
+     * @param body the body of the function.
+     */
+    public Builder addLambda(Iterable<ParameterSpec> parameters, CodeBlock body) {
+      code.addLambda(parameters, false, body);
+      return this;
+    }
+
+    /**
+     * Structures a lambda function based on some inputs and an expression body.<br>
+     * Should be used with {@link #addCode(String, Object...) addCode},
+     * to provide specific behaviour such as
+     * <b>methodcall((int x, int y) -> x + y, 5)</b>.
+     * @param parameters the input parameters of the function.
+     * @param emitTypes true if the types of the inputs should
+     * be emitted on the result.
+     * @param expressionFormat the format that should be used
+     * for the expression.
+     * @param args the values that should be placed in the holders
+     * of the format.
+     */
+    public Builder addLambda(Iterable<ParameterSpec> parameters, boolean emitTypes,
+                             String expressionFormat, Object... args) {
+      code.addLambda(parameters, emitTypes, CodeBlock.of(expressionFormat, args));
+      return this;
+    }
+
+    /**
+     * Structures a lambda function based on some inputs and an expression body.<br>
+     * Will not emit the input types.<br>
+     * Should be used with {@link #addCode(String, Object...) addCode},
+     * to provide specific behaviour such as
+     * <b>methodcall((x, y) -> x + y, 5)</b>.
+     * @param parameters the input parameters of the function.
+     * @param expressionFormat the format that should be used
+     * for the expression.
+     * @param args the values that should be placed in the holders
+     * of the format.
+     */
+    public Builder addLambda(Iterable<ParameterSpec> parameters, String expressionFormat, Object... args) {
+      code.addLambda(parameters, false, CodeBlock.of(expressionFormat, args));
+      return this;
+    }
+
+    /**
+     * Structures a producer lambda function based on a CodeBlock body.<br>
+     * Should be used with {@link #addCode(String, Object...) addCode},
+     * to provide specific behaviour such as
+     * <b>methodcall(() -> 3 + 2, 5)</b>.
+     * @param body the body of the lambda.
+     */
+    public Builder addLambda(CodeBlock body) {
+      code.addLambda(Collections.emptyList(), false, body);
+      return this;
+    }
+
+    /**
+     * Structures a producer lambda function based on an expression body.<br>
+     * Should be used with {@link #addCode(String, Object...) addCode},
+     * to provide specific behaviour such as
+     * <b>methodcall(() -> 3 + 2, 5)</b>.
+     * @param expressionFormat the format that should be used
+     * for the expression.
+     * @param args the values that should be placed in the holders
+     * of the format.
+     */
+    public Builder addLambda(String expressionFormat, Object... args) {
+      code.addLambda(Collections.emptyList(), false, expressionFormat, args);
       return this;
     }
 

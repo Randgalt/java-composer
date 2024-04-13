@@ -482,8 +482,96 @@ public final class MethodSpecTest {
         "}\n");
   }
 
-  private static CodeBlock named(String format, Map<String, ?> args){
+  private static CodeBlock named(String format, Map<String, ?> args) {
     return CodeBlock.builder().addNamed(format, args).build();
+  }
+
+  @Test public void ensureLambdaTypeError() {
+    // parameter with void type - should be rejected
+    ParameterSpec p1 = ParameterSpec.builder(TypeName.VOID, "x").build();
+
+    try {
+      // check that void type will cause errors
+      CodeBlock.builder()
+      .addLambda(List.of(p1), "$N * 2", "x");
+
+      fail();
+    } catch (IllegalArgumentException expected) {
+      assertThat(expected).hasMessageThat().isEqualTo(
+        "lambda input parameters cannot be of void type"
+      );
+    }
+  }
+
+  @Test public void ensureLambdaMethodSpecLiability() {
+    // lambda inputs
+    ParameterSpec p1 = ParameterSpec.builder(TypeName.INT, "x").build();
+    ParameterSpec p2 = ParameterSpec.builder(TypeName.DOUBLE, "y").build();
+
+    // lambda body that considers input values
+    CodeBlock body1 = CodeBlock.of("int $3N = 3; return $1N + $2N + $3N;", "x", "y", "z");
+
+    // lambda body that does not consider input values
+    CodeBlock body2 = CodeBlock.of("int $1N = 3; int $2N = 5; return $1N + $2N;", "x", "y");
+
+    MethodSpec method = MethodSpec.methodBuilder("method")
+    .addCode("methodCall(")
+    .addLambda(List.of(p1, p2), true, body1) // lambda with multiple inputs and (CodeBlock) body
+    .addCode(", ")
+    .addLambda(List.of(p2),
+      "$N + $N", "x", "y") // lambda with single input and (String) body
+    .addCode(", ")
+    .addLambda(body2) // lambda with no inputs and (CodeBlock) body
+    .addCode(", ")
+    .addLambda("5 + 7") // lambda with no inputs and (String) body
+    .addCode(", ")
+    .addLambda("method1(); method2();") // lambda with multiple statements
+    .addCode(", ")
+    .addLambda(List.of(p1), true, "x + 5") // lambda with single input of emitted type
+    .addCode(");\n")
+    .build();
+
+    assertThat(method.toString()).isEqualTo(
+      "void method() {\n" +
+        "  methodCall(" +
+          "(int x, double y) -> {int z = 3; return x + y + z;}, " +
+          "y -> x + y, " +
+          "() -> {int x = 3; int y = 5; return x + y;}, " +
+          "() -> 5 + 7, " +
+          "() -> {method1(); method2();}, " +
+          "(int x) -> x + 5" +
+        ");\n" +
+      "}\n"
+    );
+  }
+
+  @Test public void ensureLambdaCodeBlockLiability() {
+    // lambda body that does not consider input values
+    CodeBlock body = CodeBlock.of("int $1N = 3; int $2N = 5; return $1N + $2N;", "x", "y");
+
+    // lambda expression that does not consider input values
+    CodeBlock body2 = CodeBlock.of("5 + 3");
+
+    CodeBlock codeWithLambda = CodeBlock.builder()
+    .add("methodCall(")
+    .addLambda(body) // producer lambda
+    .add(", ")
+    .addLambda(body2)
+    .add(");")
+    .build();
+
+    MethodSpec method = MethodSpec.methodBuilder("method")
+    .addCode(codeWithLambda)
+    .build();
+
+    assertThat(method.toString()).isEqualTo(
+      "void method() {\n" +
+        "  methodCall(" +
+          "() -> {int x = 3; int y = 5; return x + y;}, " +
+          "() -> 5 + 3" +
+        ");\n" +
+      "}\n"
+    );
   }
 
 }

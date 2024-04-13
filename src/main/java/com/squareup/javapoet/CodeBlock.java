@@ -21,11 +21,14 @@ import javax.lang.model.type.TypeMirror;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collector;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static com.squareup.javapoet.Util.checkArgument;
@@ -413,6 +416,124 @@ public final class CodeBlock {
       formatParts.addAll(codeBlock.formatParts);
       args.addAll(codeBlock.args);
       return this;
+    }
+
+    /**
+     * Structures a lambda function based on some inputs and a CodeBlock body.<br>
+     * Should be used with {@link #add(String, Object...) addCode},
+     * to provide specific behaviour such as
+     * <b>methodcall((int x, int y) -> x + y, 5)</b>.
+     * @param parameters the input parameters of the function.
+     * @param emitTypes true if the types of the inputs should
+     * be emitted on the result.
+     * @param body the body of the function.
+     */
+    public Builder addLambda(Iterable<ParameterSpec> parameters, boolean emitTypes, CodeBlock body) {
+      Stream<ParameterSpec> parameterStream = StreamSupport.stream(
+        parameters.spliterator(),
+        false
+      );
+
+      // the inputs of the lambda (left side)
+      String inputSide = parameterStream
+      .peek(p -> checkArgument(!p.type.equals(TypeName.VOID), // validate the input types
+        "lambda input parameters cannot be of void type")
+      )
+      .map(p -> emitTypes ? p.toString() : p.name)
+      .collect(Collectors.joining(", "));
+
+      // the count of given inputs
+      int paramsLen = inputSide.split(",").length;
+
+      // on 0 or more than 1 inputs, or in case of type emission,
+      // parentheses are mandatory
+      if (paramsLen > 1 || emitTypes || inputSide.isEmpty()) {
+        inputSide = "(" + inputSide + ")";
+      }
+
+      // the body of the lambda (right side)
+      String bodySide = body.toString().replaceAll("\n", "");
+
+      // in case of multiple statements, braces are mandatory
+      if (bodySide.contains(";")) {
+        bodySide = "{" + bodySide + "}";
+      }
+
+      // the full lambda structure
+      add(inputSide + " -> " + bodySide);
+      return this;
+    }
+
+    /**
+     * Structures a lambda function based on some inputs and a CodeBlock body.<br>
+     * Will not emit the input types.<br>
+     * Should be used with {@link #add(String, Object...) addCode},
+     * to provide specific behaviour such as
+     * <b>methodcall((x, y) -> x + y, 5)</b>.
+     * @param parameters the input parameters of the function.
+     * @param body the body of the function.
+     */
+    public Builder addLambda(Iterable<ParameterSpec> parameters, CodeBlock body) {
+        return addLambda(parameters, false, body);
+    }
+
+    /**
+     * Structures a lambda function based on some inputs and an expression body.<br>
+     * Should be used with {@link #add(String, Object...) addCode},
+     * to provide specific behaviour such as
+     * <b>methodcall((int x, int y) -> x + y, 5)</b>.
+     * @param parameters the input parameters of the function.
+     * @param emitTypes true if the types of the inputs should
+     * be emitted on the result.
+     * @param expressionFormat the format that should be used
+     * for the expression.
+     * @param args the values that should be placed in the holders
+     * of the format.
+     */
+    public Builder addLambda(Iterable<ParameterSpec> parameters, boolean emitTypes,
+                             String expressionFormat, Object... args) {
+      return addLambda(parameters, emitTypes, CodeBlock.of(expressionFormat, args));
+    }
+
+    /**
+     * Structures a lambda function based on some inputs and an expression body.<br>
+     * Will not emit the input types.<br>
+     * Should be used with {@link #add(String, Object...) addCode},
+     * to provide specific behaviour such as
+     * <b>methodcall((x, y) -> x + y, 5)</b>.
+     * @param parameters the input parameters of the function.
+     * @param expressionFormat the format that should be used
+     * for the expression.
+     * @param args the values that should be placed in the holders
+     * of the format.
+     */
+    public Builder addLambda(Iterable<ParameterSpec> parameters, String expressionFormat, Object... args) {
+      return addLambda(parameters, false, CodeBlock.of(expressionFormat, args));
+    }
+
+    /**
+     * Structures a producer lambda function based on a CodeBlock body.<br>
+     * Should be used with {@link #add(String, Object...) addCode},
+     * to provide specific behaviour such as
+     * <b>methodcall(() -> 3 + 2, 5)</b>.
+     * @param body the body of the lambda.
+     */
+    public Builder addLambda(CodeBlock body) {
+      return addLambda(Collections.emptyList(), false, body);
+    }
+
+    /**
+     * Structures a producer lambda function based on an expression body.<br>
+     * Should be used with {@link #add(String, Object...) addCode},
+     * to provide specific behaviour such as
+     * <b>methodcall(() -> 3 + 2, 5)</b>.
+     * @param expressionFormat the format that should be used
+     * for the expression.
+     * @param args the values that should be placed in the holders
+     * of the format.
+     */
+    public Builder addLambda(String expressionFormat, Object... args) {
+      return addLambda(Collections.emptyList(), false, expressionFormat, args);
     }
 
     public Builder indent() {
