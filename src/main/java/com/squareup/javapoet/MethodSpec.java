@@ -296,21 +296,25 @@ public final class MethodSpec {
     private String name;
 
     private final CodeBlock.Builder javadoc = CodeBlock.builder();
-    private TypeName returnType;
-    private final Set<TypeName> exceptions = new LinkedHashSet<>();
-    private final CodeBlock.Builder code = CodeBlock.builder();
-    private boolean varargs;
-    private CodeBlock defaultValue;
-
-    public final List<TypeVariableName> typeVariables = new ArrayList<>();
     public final List<AnnotationSpec> annotations = new ArrayList<>();
     public final List<Modifier> modifiers = new ArrayList<>();
+    public final List<TypeVariableName> typeVariables = new ArrayList<>();
+    private TypeName returnType;
     public final List<ParameterSpec> parameters = new ArrayList<>();
+    private boolean varargs;
+    private final Set<TypeName> exceptions = new LinkedHashSet<>();
+    private final CodeBlock.Builder code = CodeBlock.builder();
+    private CodeBlock defaultValue;
+
 
     private Builder(String name) {
       setName(name);
     }
 
+    /**
+     * Sets a name for this builder.
+     * @param name the name to be set for the method.
+     */
     public Builder setName(String name) {
       checkNotNull(name, "name == null");
       checkArgument(name.equals(CONSTRUCTOR) || SourceVersion.isName(name),
@@ -500,6 +504,10 @@ public final class MethodSpec {
       return nextControlFlow("$L", codeBlock);
     }
 
+    /**
+     * Ends the last open control flow.
+     * Should be used once for every control flow.
+     */
     public Builder endControlFlow() {
       code.endControlFlow();
       return this;
@@ -529,6 +537,63 @@ public final class MethodSpec {
 
     public Builder addStatement(CodeBlock codeBlock) {
       code.addStatement(codeBlock);
+      return this;
+    }
+
+    /**
+     * Structures a lambda expression containing a body,
+     * and not only an expression.<br>
+     * Should be used with {@link #addCode(String, Object...) addCode},
+     * to provide specific behaviour such as
+     * methodcall((int x, int y) -> {return x + y;}, 5).
+     * @param parameters the input parameters of the function.
+     * @param body the body of the function.
+     */
+    public Builder addLambda(List<ParameterSpec> parameters, CodeBlock body) {
+      code.addLambda(parameters, body);
+      return this;
+    }
+
+    /**
+     * Structures a lambda expression containing an expression.<br>
+     * Should be used with {@link #addCode(String, Object...) addCode},
+     * to provide specific behaviour such as
+     * methodcall((int x, int y) -> {return x + y;}, 5).
+     * @param parameters the input parameters of the function.
+     * @param expressionFromat the format that should be used
+     * for the expression.
+     * @param args the values that should be placed in the holders
+     * of the format.
+     */
+    public Builder addLambda(List<ParameterSpec> parameters, String expressionFromat, Object... args) {
+      addLambda(parameters, CodeBlock.of("return " + expressionFromat + ";", args));
+      return this;
+    }
+
+    /**
+     * Structures a producer lambda expression containing a body,
+     * and not only an expression.<br>
+     * Should be used with {@link #addCode(String, Object...) addCode},
+     * to provide specific behaviour such as
+     * methodcall(() -> {return 3 + 2;}, 5).
+     * @param body the body of the lambda.
+     */
+    public Builder addLambda(CodeBlock body) {
+      addLambda(Collections.emptyList(), body);
+      return this;
+    }
+
+    /**
+     * Structures a producer lambda expression containing an expression.<br>
+     * Should be used with {@link #addCode(String, Object...) addCode}, to provide specific behaviour such as
+     * methodcall(() -> {return 3 + 2;}, 5).
+     * @param expressionFromat the format that should be used
+     * for the expression.
+     * @param args the values that should be placed in the holders
+     * of the format.
+     */
+    public Builder addLambda(String expressionFromat, Object... args) {
+      addLambda(Collections.emptyList(), expressionFromat, args);
       return this;
     }
 
