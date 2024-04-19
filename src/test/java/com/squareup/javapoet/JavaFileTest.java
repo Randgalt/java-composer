@@ -26,6 +26,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
+
+import org.jetbrains.annotations.NotNull;
 import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
@@ -303,6 +305,26 @@ public final class JavaFileTest {
               .skipJavaLangImports(true).build().toString();
       assertThat(source).isEqualTo("" + "package com.squareup.tacos;\n" + "\n"
               + "record Taco(String name, Integer code) {\n" + "}\n" + "");
+  }
+
+  @Test
+  public void recordTwoAnnotatedFields() {
+    AnnotationSpec annotationSpec = AnnotationSpec.builder(ClassName.get("com.squareup.tacos", "Spicy")).build();
+    String source = JavaFile
+            .builder("com.squareup.tacos",
+                    TypeSpec.recordBuilder("Taco")
+                            .addField(FieldSpec.builder(String.class, "name")
+                                    .addAnnotation(annotationSpec)
+                                    .build())
+                            .addField(FieldSpec.builder(Integer.class, "code")
+                                    .addAnnotation(annotationSpec)
+                                    .build())
+                            .build())
+            .skipJavaLangImports(true).build().toString();
+
+    assertThat(source).isEqualTo("" + "package com.squareup.tacos;\n" + "\n"
+            + "record Taco(\n" + "    @Spicy\n    String name, \n\n"
+            + "    @Spicy\n    Integer code\n" + ") {\n}\n" + "");
   }
 
   @Test public void conflictingImports() throws Exception {

@@ -247,6 +247,7 @@ public final class TypeSpec {
 
           // Record constructor
           boolean firstParameter = true;
+          boolean hasAnnotations = false; // We check for annotations in case we need to unindent later
           codeWriter.emit("(");
           int fieldSpecsLength = fieldSpecs.size();
           for (int i = 0; i < fieldSpecsLength; i++) {
@@ -255,10 +256,24 @@ public final class TypeSpec {
             if (fieldSpec.hasModifier(Modifier.STATIC))
               continue;
             ParameterSpec parameter = ParameterSpec.builder(fieldSpec.type, fieldSpec.name).build();
+            hasAnnotations = !fieldSpec.annotations.isEmpty();
             if (!firstParameter)
               codeWriter.emit(",").emitWrappingSpace();
+
+            if (hasAnnotations) {
+              if (firstParameter) {
+                codeWriter.emit("\n").indent(2);
+              } else {
+                codeWriter.emit("\n\n");
+              }
+              codeWriter.emitAnnotations(fieldSpec.annotations, false);
+            }
+
             parameter.emit(codeWriter, !(i < fieldSpecsLength));
             firstParameter = false;
+          }
+          if (hasAnnotations) {
+            codeWriter.unindent(2).emit("\n");
           }
           codeWriter.emit(")");
         } else {
