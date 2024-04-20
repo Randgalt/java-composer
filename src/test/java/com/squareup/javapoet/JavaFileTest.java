@@ -26,8 +26,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
-
-import org.jetbrains.annotations.NotNull;
 import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
