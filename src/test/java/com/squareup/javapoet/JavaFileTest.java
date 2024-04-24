@@ -320,9 +320,11 @@ public final class JavaFileTest {
                             .build())
             .skipJavaLangImports(true).build().toString();
 
-    assertThat(source).isEqualTo("" + "package com.squareup.tacos;\n" + "\n"
-            + "record Taco(\n" + "    @Spicy\n    String name, \n\n"
-            + "    @Spicy\n    Integer code\n" + ") {\n}\n" + "");
+    assertThat(source).isEqualTo(""
+            + "package com.squareup.tacos;\n"
+            + "\n"
+            + "record Taco(@Spicy String name, @Spicy Integer code) {\n"
+            + "}\n");
   }
 
   @Test public void conflictingImports() throws Exception {
