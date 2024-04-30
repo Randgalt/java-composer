@@ -430,7 +430,7 @@ public final class CodeBlock {
       // check that the input types are valid
       for (ParameterSpec parameter : parameters) {
         checkArgument(!parameter.type.equals(TypeName.VOID),
-          "lambda input parameters cannot be of void type!");
+          "lambda input parameters cannot be of void type");
       }
 
       // the inputs of the lambda (left side)
