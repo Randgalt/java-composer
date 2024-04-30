@@ -305,6 +305,28 @@ public final class JavaFileTest {
               + "record Taco(String name, Integer code) {\n" + "}\n" + "");
   }
 
+  @Test
+  public void recordTwoAnnotatedFields() {
+    AnnotationSpec annotationSpec = AnnotationSpec.builder(ClassName.get("com.squareup.tacos", "Spicy")).build();
+    String source = JavaFile
+            .builder("com.squareup.tacos",
+                    TypeSpec.recordBuilder("Taco")
+                            .addField(FieldSpec.builder(String.class, "name")
+                                    .addAnnotation(annotationSpec)
+                                    .build())
+                            .addField(FieldSpec.builder(Integer.class, "code")
+                                    .addAnnotation(annotationSpec)
+                                    .build())
+                            .build())
+            .skipJavaLangImports(true).build().toString();
+
+    assertThat(source).isEqualTo(""
+            + "package com.squareup.tacos;\n"
+            + "\n"
+            + "record Taco(@Spicy String name, @Spicy Integer code) {\n"
+            + "}\n");
+  }
+
   @Test public void conflictingImports() throws Exception {
     String source = JavaFile.builder("com.squareup.tacos",
         TypeSpec.classBuilder("Taco")

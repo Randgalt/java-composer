@@ -257,6 +257,7 @@ public final class TypeSpec {
             ParameterSpec parameter = ParameterSpec.builder(fieldSpec.type, fieldSpec.name).build();
             if (!firstParameter)
               codeWriter.emit(",").emitWrappingSpace();
+            codeWriter.emitAnnotations(fieldSpec.annotations, true);
             parameter.emit(codeWriter, !(i < fieldSpecsLength));
             firstParameter = false;
           }
