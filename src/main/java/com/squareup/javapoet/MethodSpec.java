@@ -560,13 +560,13 @@ public final class MethodSpec {
      * to provide specific behaviour such as
      * methodcall((int x, int y) -> {return x + y;}, 5).
      * @param parameters the input parameters of the function.
-     * @param expressionFromat the format that should be used
+     * @param expressionFormat the format that should be used
      * for the expression.
      * @param args the values that should be placed in the holders
      * of the format.
      */
-    public Builder addLambda(List<ParameterSpec> parameters, String expressionFromat, Object... args) {
-      addLambda(parameters, CodeBlock.of("return " + expressionFromat + ";", args));
+    public Builder addLambda(List<ParameterSpec> parameters, String expressionFormat, Object... args) {
+      addLambda(parameters, CodeBlock.of("return " + expressionFormat + ";", args));
       return this;
     }
 
@@ -587,13 +587,13 @@ public final class MethodSpec {
      * Structures a producer lambda expression containing an expression.<br>
      * Should be used with {@link #addCode(String, Object...) addCode}, to provide specific behaviour such as
      * methodcall(() -> {return 3 + 2;}, 5).
-     * @param expressionFromat the format that should be used
+     * @param expressionFormat the format that should be used
      * for the expression.
      * @param args the values that should be placed in the holders
      * of the format.
      */
-    public Builder addLambda(String expressionFromat, Object... args) {
-      addLambda(Collections.emptyList(), expressionFromat, args);
+    public Builder addLambda(String expressionFormat, Object... args) {
+      addLambda(Collections.emptyList(), expressionFormat, args);
       return this;
     }
 
