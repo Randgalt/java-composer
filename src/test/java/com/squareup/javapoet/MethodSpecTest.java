@@ -498,7 +498,7 @@ public final class MethodSpecTest {
       fail();
     } catch (IllegalArgumentException expected) {
       assertThat(expected).hasMessageThat().isEqualTo(
-        "lambda input parameters cannot be of void type!"
+        "lambda input parameters cannot be of void type"
       );
     }
   }
@@ -516,7 +516,7 @@ public final class MethodSpecTest {
 
     MethodSpec method = MethodSpec.methodBuilder("method")
     .addCode("methodCall(")
-    .addLambda(List.of(p1, p2), body1) // lambda with multiple inputs and (CodeBlock) body
+    .addLambda(List.of(p1, p2), true, body1) // lambda with multiple inputs and (CodeBlock) body
     .addCode(", ")
     .addLambda(List.of(p2),
       "$N + $N", "x", "y") // lambda with single input and (String) body
@@ -524,6 +524,10 @@ public final class MethodSpecTest {
     .addLambda(body2) // lambda with no inputs and (CodeBlock) body
     .addCode(", ")
     .addLambda("5 + 7") // lambda with no inputs and (String) body
+    .addCode(", ")
+    .addLambda("method1(); method2();") // lambda with multiple statements
+    .addCode(", ")
+    .addLambda(List.of(p1), true, "x + 5") // lambda with single input of emitted type
     .addCode(");\n")
     .build();
 
@@ -531,9 +535,11 @@ public final class MethodSpecTest {
       "void method() {\n" +
         "  methodCall(" +
           "(int x, double y) -> {int z = 3; return x + y + z;}, " +
-          "(double y) -> {return x + y;}, " +
+          "y -> x + y, " +
           "() -> {int x = 3; int y = 5; return x + y;}, " +
-          "() -> {return 5 + 7;}" +
+          "() -> 5 + 7, " +
+          "() -> {method1(); method2();}, " +
+          "(int x) -> x + 5" +
         ");\n" +
       "}\n"
     );
@@ -543,9 +549,14 @@ public final class MethodSpecTest {
     // lambda body that does not consider input values
     CodeBlock body = CodeBlock.of("int $1N = 3; int $2N = 5; return $1N + $2N;", "x", "y");
 
+    // lambda expression that does not consider input values
+    CodeBlock body2 = CodeBlock.of("5 + 3");
+
     CodeBlock codeWithLambda = CodeBlock.builder()
     .add("methodCall(")
     .addLambda(body) // producer lambda
+    .add(", ")
+    .addLambda(body2)
     .add(");")
     .build();
 
@@ -556,7 +567,8 @@ public final class MethodSpecTest {
     assertThat(method.toString()).isEqualTo(
       "void method() {\n" +
         "  methodCall(" +
-          "() -> {int x = 3; int y = 5; return x + y;}" +
+          "() -> {int x = 3; int y = 5; return x + y;}, " +
+          "() -> 5 + 3" +
         ");\n" +
       "}\n"
     );
