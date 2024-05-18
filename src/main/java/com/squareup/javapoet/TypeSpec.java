@@ -236,68 +236,8 @@ public final class TypeSpec {
         }
         codeWriter.emitTypeVariables(typeVariables);
 
-        List<TypeName> extendsTypes;
-        List<TypeName> implementsTypes;
-        if (kind == Kind.INTERFACE) {
-          extendsTypes = superinterfaces;
-          implementsTypes = Collections.emptyList();
-        } else if (kind == Kind.RECORD) {
-          extendsTypes = Collections.emptyList();
-          implementsTypes = superinterfaces;
-
-          // Record constructor
-          boolean firstParameter = true;
-          codeWriter.emit("(");
-          int fieldSpecsLength = fieldSpecs.size();
-          for (int i = 0; i < fieldSpecsLength; i++) {
-            FieldSpec fieldSpec = fieldSpecs.get(i);
-
-            if (fieldSpec.hasModifier(Modifier.STATIC))
-              continue;
-            ParameterSpec parameter = ParameterSpec.builder(fieldSpec.type, fieldSpec.name).build();
-            if (!firstParameter)
-              codeWriter.emit(",").emitWrappingSpace();
-            codeWriter.emitAnnotations(fieldSpec.annotations, true);
-            parameter.emit(codeWriter, !(i < fieldSpecsLength));
-            firstParameter = false;
-          }
-          codeWriter.emit(")");
-        } else {
-          extendsTypes = superclass.equals(ClassName.OBJECT)
-              ? Collections.emptyList()
-              : Collections.singletonList(superclass);
-          implementsTypes = superinterfaces;
-        }
-
-        if (!extendsTypes.isEmpty()) {
-          codeWriter.emit(" extends");
-          boolean firstType = true;
-          for (TypeName type : extendsTypes) {
-            if (!firstType) codeWriter.emit(",");
-            codeWriter.emit(" $T", type);
-            firstType = false;
-          }
-        }
-
-        if (!implementsTypes.isEmpty()) {
-          codeWriter.emit(" implements");
-          boolean firstType = true;
-          for (TypeName type : implementsTypes) {
-            if (!firstType) codeWriter.emit(",");
-            codeWriter.emit(" $T", type);
-            firstType = false;
-          }
-        }
-
-        if (!permits.isEmpty()) {
-          codeWriter.emit(" permits");
-          boolean firstType = true;
-          for (TypeName type : permits) {
-            if (!firstType) codeWriter.emit(",");
-            codeWriter.emit(" $T", type);
-            firstType = false;
-          }
-        }
+        // emit the hierarchy data of the type (super types, interfaces, permitted types)
+        emitTypeHierarchy(codeWriter);
 
         codeWriter.popType();
 
@@ -391,6 +331,78 @@ public final class TypeSpec {
       }
     } finally {
       codeWriter.statementLine = previousStatementLine;
+    }
+  }
+
+  /**
+   * Used to emit the meta data of this types'
+   * hierarchy. It will emit the 'extends', 'implements'
+   * and 'permits' types.
+   * @param codeWriter the CodeWriter that will be used.
+   * @throws IOException
+   */
+  private void emitTypeHierarchy(CodeWriter codeWriter) throws IOException {
+    List<TypeName> extendsTypes;
+    List<TypeName> implementsTypes;
+    if (kind == Kind.INTERFACE) {
+      extendsTypes = superinterfaces;
+      implementsTypes = Collections.emptyList();
+    } else if (kind == Kind.RECORD) {
+      extendsTypes = Collections.emptyList();
+      implementsTypes = superinterfaces;
+
+      // Record constructor
+      boolean firstParameter = true;
+      codeWriter.emit("(");
+      int fieldSpecsLength = fieldSpecs.size();
+      for (int i = 0; i < fieldSpecsLength; i++) {
+        FieldSpec fieldSpec = fieldSpecs.get(i);
+
+        if (fieldSpec.hasModifier(Modifier.STATIC))
+          continue;
+        ParameterSpec parameter = ParameterSpec.builder(fieldSpec.type, fieldSpec.name).build();
+        if (!firstParameter)
+          codeWriter.emit(",").emitWrappingSpace();
+        codeWriter.emitAnnotations(fieldSpec.annotations, true);
+        parameter.emit(codeWriter, !(i < fieldSpecsLength));
+        firstParameter = false;
+      }
+      codeWriter.emit(")");
+    } else {
+      extendsTypes = superclass.equals(ClassName.OBJECT)
+          ? Collections.emptyList()
+          : Collections.singletonList(superclass);
+      implementsTypes = superinterfaces;
+    }
+
+    if (!extendsTypes.isEmpty()) {
+      codeWriter.emit(" extends");
+      boolean firstType = true;
+      for (TypeName type : extendsTypes) {
+        if (!firstType) codeWriter.emit(",");
+        codeWriter.emit(" $T", type);
+        firstType = false;
+      }
+    }
+
+    if (!implementsTypes.isEmpty()) {
+      codeWriter.emit(" implements");
+      boolean firstType = true;
+      for (TypeName type : implementsTypes) {
+        if (!firstType) codeWriter.emit(",");
+        codeWriter.emit(" $T", type);
+        firstType = false;
+      }
+    }
+
+    if (!permits.isEmpty()) {
+      codeWriter.emit(" permits");
+      boolean firstType = true;
+      for (TypeName type : permits) {
+        if (!firstType) codeWriter.emit(",");
+        codeWriter.emit(" $T", type);
+        firstType = false;
+      }
     }
   }
 
@@ -877,8 +889,11 @@ public final class TypeSpec {
           checkState(fieldSpec.modifiers.containsAll(check), "%s %s.%s requires modifiers %s",
               kind, name, fieldSpec.name, check);
         }
-        checkState(!fieldSpec.hasModifier(Modifier.SEALED) && !fieldSpec.hasModifier(Modifier.NON_SEALED), "%s %s.%s cannot have modifiers %s or %s",
-                kind, name, fieldSpec.name, Modifier.SEALED, Modifier.NON_SEALED);
+        checkState(
+          !fieldSpec.hasModifier(Modifier.SEALED) && !fieldSpec.hasModifier(Modifier.NON_SEALED),
+          "%s %s.%s cannot have modifiers %s or %s",
+          kind, name, fieldSpec.name, Modifier.SEALED, Modifier.NON_SEALED
+        );
       }
 
       for (MethodSpec methodSpec : methodSpecs) {
@@ -906,8 +921,11 @@ public final class TypeSpec {
           checkState(!methodSpec.hasModifier(Modifier.DEFAULT), "%s %s.%s cannot be default",
               kind, name, methodSpec.name);
         }
-        checkState(!methodSpec.hasModifier(Modifier.SEALED) && !methodSpec.hasModifier(Modifier.NON_SEALED), "%s %s.%s cannot have modifiers %s or %s",
-                kind, name, methodSpec.name, Modifier.SEALED, Modifier.NON_SEALED);
+        checkState(
+          !methodSpec.hasModifier(Modifier.SEALED) && !methodSpec.hasModifier(Modifier.NON_SEALED),
+          "%s %s.%s cannot have modifiers %s or %s",
+          kind, name, methodSpec.name, Modifier.SEALED, Modifier.NON_SEALED
+        );
       }
 
       for (TypeSpec typeSpec : typeSpecs) {
