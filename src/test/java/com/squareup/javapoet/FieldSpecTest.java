@@ -40,8 +40,7 @@ public class FieldSpecTest {
     try {
       FieldSpec.builder(int.class, "foo").addAnnotations(null);
       fail();
-    }
-    catch (IllegalArgumentException expected) {
+    } catch (IllegalArgumentException expected) {
       assertThat(expected.getMessage())
           .isEqualTo("annotationSpecs == null");
     }

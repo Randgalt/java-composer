@@ -307,7 +307,9 @@ public final class JavaFileTest {
 
   @Test
   public void recordTwoAnnotatedFields() {
-    AnnotationSpec annotationSpec = AnnotationSpec.builder(ClassName.get("com.squareup.tacos", "Spicy")).build();
+    AnnotationSpec annotationSpec = AnnotationSpec.builder(
+        ClassName.get("com.squareup.tacos", "Spicy")
+    ).build();
     String source = JavaFile
             .builder("com.squareup.tacos",
                     TypeSpec.recordBuilder("Taco")

@@ -154,7 +154,8 @@ public final class MethodSpecTest {
         + "@java.lang.Override\n"
         + "protected <T extends java.lang.Runnable & java.io.Closeable> java.lang.Runnable "
         + "everything(\n"
-        + "    java.lang.String arg0, java.util.List<? extends T> arg1) throws java.io.IOException,\n"
+        + "    java.lang.String arg0, java.util.List<? extends T> arg1) "
+        + "throws java.io.IOException,\n"
         + "    java.lang.SecurityException {\n"
         + "}\n");
   }
@@ -237,38 +238,49 @@ public final class MethodSpecTest {
       MethodSpec.overriding(findFirst(methods, "finalMethod"));
       fail();
     } catch (IllegalArgumentException expected) {
-      assertThat(expected).hasMessageThat().isEqualTo("cannot override method with modifiers: [final]");
+      assertThat(expected).hasMessageThat().isEqualTo(
+        "cannot override method with modifiers: [final]"
+      );
     }
     try {
       MethodSpec.overriding(findFirst(methods, "privateMethod"));
       fail();
     } catch (IllegalArgumentException expected) {
-      assertThat(expected).hasMessageThat().isEqualTo("cannot override method with modifiers: [private]");
+      assertThat(expected).hasMessageThat().isEqualTo(
+        "cannot override method with modifiers: [private]"
+      );
     }
     try {
       MethodSpec.overriding(findFirst(methods, "staticMethod"));
       fail();
     } catch (IllegalArgumentException expected) {
-      assertThat(expected).hasMessageThat().isEqualTo("cannot override method with modifiers: [static]");
+      assertThat(expected).hasMessageThat().isEqualTo(
+        "cannot override method with modifiers: [static]"
+      );
     }
   }
 
   abstract static class AbstractClassWithPrivateAnnotation {
 
-    private @interface PrivateAnnotation{ }
+    private @interface PrivateAnnotation {}
 
     abstract void foo(@PrivateAnnotation final String bar);
   }
 
   @Test public void overrideDoesNotCopyParameterAnnotations() {
     TypeElement abstractTypeElement = getElement(AbstractClassWithPrivateAnnotation.class);
-    ExecutableElement fooElement = ElementFilter.methodsIn(abstractTypeElement.getEnclosedElements()).get(0);
+    ExecutableElement fooElement = ElementFilter.methodsIn(
+      abstractTypeElement.getEnclosedElements()
+    ).get(0);
     ClassName implClassName = ClassName.get("com.squareup.javapoet", "Impl");
     TypeSpec type = TypeSpec.classBuilder(implClassName)
             .superclass(abstractTypeElement.asType())
             .addMethod(MethodSpec.overriding(fooElement).build())
             .build();
-    JavaFileObject jfo = JavaFile.builder(implClassName.packageName, type).build().toJavaFileObject();
+    JavaFileObject jfo = JavaFile.builder(
+      implClassName.packageName,
+      type
+    ).build().toJavaFileObject();
     Compilation compilation = javac().compile(jfo);
     assertThat(compilation).succeeded();
   }
@@ -475,14 +487,14 @@ public final class MethodSpecTest {
         .build();
 
     assertThat(methodSpec.toString()).isEqualTo(""
-        + "void method() {\n" +
-        "  do {\n" +
-        "    valueField--;\n" +
-        "  } while (valueField > 5);\n" +
-        "}\n");
+        + "void method() {\n"
+        + "  do {\n"
+        + "    valueField--;\n"
+        + "  } while (valueField > 5);\n"
+        + "}\n");
   }
 
-  private static CodeBlock named(String format, Map<String, ?> args){
+  private static CodeBlock named(String format, Map<String, ?> args) {
     return CodeBlock.builder().addNamed(format, args).build();
   }
 

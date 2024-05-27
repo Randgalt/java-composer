@@ -81,7 +81,9 @@ public final class NameAllocatorTest {
       nameAllocator.newName("bar", 1);
       fail();
     } catch (IllegalArgumentException expected) {
-      assertThat(expected).hasMessageThat().isEqualTo("tag 1 cannot be used for both 'foo' and 'bar'");
+      assertThat(expected).hasMessageThat().isEqualTo(
+        "tag 1 cannot be used for both 'foo' and 'bar'"
+      );
     }
   }
 

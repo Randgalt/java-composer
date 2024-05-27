@@ -110,16 +110,23 @@ public final class ClassNameTest {
     TypeElement object = elements.getTypeElement(Object.class.getCanonicalName());
     assertThat(ClassName.get(object).toString()).isEqualTo("java.lang.Object");
     TypeElement outer = elements.getTypeElement($Outer.class.getCanonicalName());
-    assertThat(ClassName.get(outer).toString()).isEqualTo("com.squareup.javapoet.ClassNameTest.$Outer");
-    TypeElement inner = elements.getTypeElement($Outer.$Inner.class.getCanonicalName());
-    assertThat(ClassName.get(inner).toString()).isEqualTo("com.squareup.javapoet.ClassNameTest.$Outer.$Inner");
+    assertThat(ClassName.get(outer).toString()).isEqualTo(
+      "com.squareup.javapoet.ClassNameTest.$Outer"
+    );
+    TypeElement inner = elements.getTypeElement(
+      $Outer.$Inner.class.getCanonicalName()
+    );
+    assertThat(ClassName.get(inner).toString()).isEqualTo(
+      "com.squareup.javapoet.ClassNameTest.$Outer.$Inner"
+    );
   }
 
   /**
    * Buck builds with "source-based ABI generation" and those builds don't support
    * {@link TypeElement#getKind()}. Test to confirm that we don't use that API.
    */
-  @Test @Ignore("Doesn't work with Java 17") public void classNameFromTypeElementDoesntUseGetKind() {
+  @Test @Ignore("Doesn't work with Java 17") public void
+      classNameFromTypeElementDoesntUseGetKind() {
     Elements elements = compilationRule.getElements();
     TypeElement object = elements.getTypeElement(Object.class.getCanonicalName());
     assertThat(ClassName.get(preventGetKind(object)).toString())
@@ -152,7 +159,9 @@ public final class ClassNameTest {
         .isEqualTo("com.squareup.javapoet.ClassNameTest.OuterClass.InnerClass");
     assertThat((ClassName.get(new Object() {}.getClass())).toString())
         .isEqualTo("com.squareup.javapoet.ClassNameTest$1");
-    assertThat((ClassName.get(new Object() { Object inner = new Object() {}; }.inner.getClass())).toString())
+    assertThat((ClassName.get(new Object() {
+        Object inner = new Object() {};
+    }.inner.getClass())).toString())
         .isEqualTo("com.squareup.javapoet.ClassNameTest$2$1");
     assertThat((ClassName.get($Outer.class)).toString())
         .isEqualTo("com.squareup.javapoet.ClassNameTest.$Outer");
