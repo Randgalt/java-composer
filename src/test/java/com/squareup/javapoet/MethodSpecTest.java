@@ -516,7 +516,7 @@ public final class MethodSpecTest {
 
     MethodSpec method = MethodSpec.methodBuilder("method")
     .addCode("methodCall(")
-    .addLambda(List.of(p1, p2), true, body1) // lambda with multiple inputs and (CodeBlock) body
+    .addLambda(List.of(p1, p2), LambdaMode.VISIBLE_TYPES, body1) // lambda with multiple inputs and (CodeBlock) body
     .addCode(", ")
     .addLambda(List.of(p2),
       "$N + $N", "x", "y") // lambda with single input and (String) body
@@ -527,7 +527,7 @@ public final class MethodSpecTest {
     .addCode(", ")
     .addLambda("method1(); method2();") // lambda with multiple statements
     .addCode(", ")
-    .addLambda(List.of(p1), true, "x + 5") // lambda with single input of emitted type
+    .addLambda(List.of(p1), LambdaMode.VISIBLE_TYPES, "x + 5") // lambda with single input of emitted type
     .addCode(");\n")
     .build();
 

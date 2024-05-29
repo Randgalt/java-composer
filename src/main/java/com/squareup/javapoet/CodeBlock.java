@@ -424,11 +424,14 @@ public final class CodeBlock {
      * to provide specific behaviour such as
      * <b>methodcall((int x, int y) -> x + y, 5)</b>.
      * @param parameters the input parameters of the function.
-     * @param emitTypes true if the types of the inputs should
-     * be emitted on the result.
+     * @param mode the format mode that should be used.
+     * @see com.squareup.javapoet.LambdaMode LambdaMode.
      * @param body the body of the function.
      */
-    public Builder addLambda(Iterable<ParameterSpec> parameters, boolean emitTypes, CodeBlock body) {
+    public Builder addLambda(Iterable<ParameterSpec> parameters, LambdaMode mode, CodeBlock body) {
+      // check for specification of input type visibility
+      boolean emitTypes = mode.equals(LambdaMode.VISIBLE_TYPES);
+
       Stream<ParameterSpec> parameterStream = StreamSupport.stream(
         parameters.spliterator(),
         false
@@ -474,7 +477,7 @@ public final class CodeBlock {
      * @param body the body of the function.
      */
     public Builder addLambda(Iterable<ParameterSpec> parameters, CodeBlock body) {
-        return addLambda(parameters, false, body);
+        return addLambda(parameters, LambdaMode.DEFAULT, body);
     }
 
     /**
@@ -483,16 +486,16 @@ public final class CodeBlock {
      * to provide specific behaviour such as
      * <b>methodcall((int x, int y) -> x + y, 5)</b>.
      * @param parameters the input parameters of the function.
-     * @param emitTypes true if the types of the inputs should
-     * be emitted on the result.
+     * @param mode the format mode that should be used.
+     * @see com.squareup.javapoet.LambdaMode LambdaMode.
      * @param expressionFormat the format that should be used
      * for the expression.
      * @param args the values that should be placed in the holders
      * of the format.
      */
-    public Builder addLambda(Iterable<ParameterSpec> parameters, boolean emitTypes,
+    public Builder addLambda(Iterable<ParameterSpec> parameters, LambdaMode mode,
                              String expressionFormat, Object... args) {
-      return addLambda(parameters, emitTypes, CodeBlock.of(expressionFormat, args));
+      return addLambda(parameters, mode, CodeBlock.of(expressionFormat, args));
     }
 
     /**
@@ -508,7 +511,20 @@ public final class CodeBlock {
      * of the format.
      */
     public Builder addLambda(Iterable<ParameterSpec> parameters, String expressionFormat, Object... args) {
-      return addLambda(parameters, false, CodeBlock.of(expressionFormat, args));
+      return addLambda(parameters, LambdaMode.DEFAULT, CodeBlock.of(expressionFormat, args));
+    }
+
+    /**
+     * Structures a producer lambda function based on a CodeBlock body.<br>
+     * Should be used with {@link #addCode(String, Object...) addCode},
+     * to provide specific behaviour such as
+     * <b>methodcall(() -> 3 + 2, 5)</b>.
+     * @param mode the format mode that should be used.
+     * @see com.squareup.javapoet.LambdaMode LambdaMode.
+     * @param body the body of the lambda.
+     */
+    public Builder addLambda(LambdaMode mode, CodeBlock body) {
+      return addLambda(Collections.emptyList(), mode, body);
     }
 
     /**
@@ -519,7 +535,23 @@ public final class CodeBlock {
      * @param body the body of the lambda.
      */
     public Builder addLambda(CodeBlock body) {
-      return addLambda(Collections.emptyList(), false, body);
+      return addLambda(Collections.emptyList(), LambdaMode.DEFAULT, body);
+    }
+
+    /**
+     * Structures a producer lambda function based on an expression body.<br>
+     * Should be used with {@link #addCode(String, Object...) addCode},
+     * to provide specific behaviour such as
+     * <b>methodcall(() -> 3 + 2, 5)</b>.
+     * @param mode the format mode that should be used.
+     * @see com.squareup.javapoet.LambdaMode LambdaMode.
+     * @param expressionFormat the format that should be used
+     * for the expression.
+     * @param args the values that should be placed in the holders
+     * of the format.
+     */
+    public Builder addLambda(LambdaMode mode, String expressionFormat, Object... args) {
+      return addLambda(Collections.emptyList(), mode, expressionFormat, args);
     }
 
     /**
@@ -533,7 +565,7 @@ public final class CodeBlock {
      * of the format.
      */
     public Builder addLambda(String expressionFormat, Object... args) {
-      return addLambda(Collections.emptyList(), false, expressionFormat, args);
+      return addLambda(Collections.emptyList(), LambdaMode.DEFAULT, expressionFormat, args);
     }
 
     public Builder indent() {

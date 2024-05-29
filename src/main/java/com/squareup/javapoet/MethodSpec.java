@@ -546,12 +546,13 @@ public final class MethodSpec {
      * to provide specific behaviour such as
      * <b>methodcall((int x, int y) -> x + y, 5)</b>.
      * @param parameters the input parameters of the function.
-     * @param emitTypes true if the types of the inputs should
+     * @param mode the format mode that should be used.
+     * @see com.squareup.javapoet.LambdaMode LambdaMode.
      * be emitted on the result.
      * @param body the body of the function.
      */
-    public Builder addLambda(Iterable<ParameterSpec> parameters, boolean emitTypes, CodeBlock body) {
-      code.addLambda(parameters, emitTypes, body);
+    public Builder addLambda(Iterable<ParameterSpec> parameters, LambdaMode mode, CodeBlock body) {
+      code.addLambda(parameters, mode, body);
       return this;
     }
 
@@ -565,7 +566,7 @@ public final class MethodSpec {
      * @param body the body of the function.
      */
     public Builder addLambda(Iterable<ParameterSpec> parameters, CodeBlock body) {
-      code.addLambda(parameters, false, body);
+      code.addLambda(parameters, LambdaMode.DEFAULT, body);
       return this;
     }
 
@@ -575,16 +576,16 @@ public final class MethodSpec {
      * to provide specific behaviour such as
      * <b>methodcall((int x, int y) -> x + y, 5)</b>.
      * @param parameters the input parameters of the function.
-     * @param emitTypes true if the types of the inputs should
-     * be emitted on the result.
+     * @param mode the format mode that should be used.
+     * @see com.squareup.javapoet.LambdaMode LambdaMode.
      * @param expressionFormat the format that should be used
      * for the expression.
      * @param args the values that should be placed in the holders
      * of the format.
      */
-    public Builder addLambda(Iterable<ParameterSpec> parameters, boolean emitTypes,
+    public Builder addLambda(Iterable<ParameterSpec> parameters, LambdaMode mode,
                              String expressionFormat, Object... args) {
-      code.addLambda(parameters, emitTypes, CodeBlock.of(expressionFormat, args));
+      code.addLambda(parameters, mode, CodeBlock.of(expressionFormat, args));
       return this;
     }
 
@@ -601,7 +602,21 @@ public final class MethodSpec {
      * of the format.
      */
     public Builder addLambda(Iterable<ParameterSpec> parameters, String expressionFormat, Object... args) {
-      code.addLambda(parameters, false, CodeBlock.of(expressionFormat, args));
+      code.addLambda(parameters, LambdaMode.DEFAULT, CodeBlock.of(expressionFormat, args));
+      return this;
+    }
+
+    /**
+     * Structures a producer lambda function based on a CodeBlock body.<br>
+     * Should be used with {@link #addCode(String, Object...) addCode},
+     * to provide specific behaviour such as
+     * <b>methodcall(() -> 3 + 2, 5)</b>.
+     * @param mode the format mode that should be used.
+     * @see com.squareup.javapoet.LambdaMode LambdaMode.
+     * @param body the body of the lambda.
+     */
+    public Builder addLambda(LambdaMode mode, CodeBlock body) {
+      code.addLambda(Collections.emptyList(), mode, body);
       return this;
     }
 
@@ -613,7 +628,24 @@ public final class MethodSpec {
      * @param body the body of the lambda.
      */
     public Builder addLambda(CodeBlock body) {
-      code.addLambda(Collections.emptyList(), false, body);
+      code.addLambda(Collections.emptyList(), LambdaMode.DEFAULT, body);
+      return this;
+    }
+
+    /**
+     * Structures a producer lambda function based on an expression body.<br>
+     * Should be used with {@link #addCode(String, Object...) addCode},
+     * to provide specific behaviour such as
+     * <b>methodcall(() -> 3 + 2, 5)</b>.
+     * @param mode the format mode that should be used.
+     * @see com.squareup.javapoet.LambdaMode LambdaMode.
+     * @param expressionFormat the format that should be used
+     * for the expression.
+     * @param args the values that should be placed in the holders
+     * of the format.
+     */
+    public Builder addLambda(LambdaMode mode, String expressionFormat, Object... args) {
+      code.addLambda(Collections.emptyList(), mode, expressionFormat, args);
       return this;
     }
 
@@ -628,7 +660,7 @@ public final class MethodSpec {
      * of the format.
      */
     public Builder addLambda(String expressionFormat, Object... args) {
-      code.addLambda(Collections.emptyList(), false, expressionFormat, args);
+      code.addLambda(Collections.emptyList(), LambdaMode.DEFAULT, expressionFormat, args);
       return this;
     }
 
