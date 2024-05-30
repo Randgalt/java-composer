@@ -574,4 +574,31 @@ public final class MethodSpecTest {
     );
   }
 
+  @Test public void ensureLambdaModeLiability() {
+    // lambda body that does not consider input values
+    CodeBlock body = CodeBlock.of("int $1N = 3; int $2N = 5; return $1N + $2N;", "x", "y");
+
+    CodeBlock codeWithLambda = CodeBlock.builder()
+    .add("methodCall(")
+    .addLambda(LambdaMode.VISIBLE_TYPES, "5 + 3") // ensure that redundant mode specification doesnt break anything
+    .add(");\n")
+    .build();
+
+    MethodSpec method = MethodSpec.methodBuilder("method")
+    .addCode(codeWithLambda)
+    .addCode("Producer<Integer> x = ")
+    .addLambda(LambdaMode.VISIBLE_TYPES, body) // ensure that redundant mode specification doesnt break anything
+    .addCode(";")
+    .build();
+
+    assertThat(method.toString()).isEqualTo(
+      "void method() {\n" +
+        "  methodCall(" +
+          "() -> 5 + 3" +
+        ");\n" +
+        "  Producer<Integer> x = () -> {int x = 3; int y = 5; return x + y;};\n" +
+      "}\n"
+    );
+  }
+
 }
