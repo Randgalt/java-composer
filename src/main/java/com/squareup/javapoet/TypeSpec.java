@@ -610,7 +610,7 @@ public final class TypeSpec {
     public Builder addPermits(Iterable<? extends TypeName> permits) {
       checkArgument(permits != null, "permits == null");
       for (TypeName permit : permits) {
-        addPermits(permits);
+        addPermits(permit);
       }
       return this;
     }
