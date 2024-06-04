@@ -53,6 +53,8 @@ public final class TypesEclipseTest extends AbstractTypesTest {
    *
    * <p>To use this rule in a test, just add the following field: <pre>   {@code
    *   @Rule public CompilationRule compilationRule = new CompilationRule();}
+   *  </pre>
+   * </p>
    *
    * @author Gregory Kick
    */
@@ -130,7 +132,11 @@ public final class TypesEclipseTest extends AbstractTypesTest {
       JavaCompiler compiler = new EclipseCompiler();
       DiagnosticCollector<JavaFileObject> diagnosticCollector =
           new DiagnosticCollector<>();
-      JavaFileManager fileManager = compiler.getStandardFileManager(diagnosticCollector, Locale.getDefault(), UTF_8);
+      JavaFileManager fileManager = compiler.getStandardFileManager(
+        diagnosticCollector,
+        Locale.getDefault(),
+        UTF_8
+      );
       JavaCompiler.CompilationTask task = compiler.getTask(
           null,
           fileManager,

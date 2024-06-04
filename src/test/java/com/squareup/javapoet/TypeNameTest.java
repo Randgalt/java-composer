@@ -31,7 +31,8 @@ import static org.junit.Assert.assertNotEquals;
 
 public class TypeNameTest {
 
-  private static final AnnotationSpec ANNOTATION_SPEC = AnnotationSpec.builder(ClassName.OBJECT).build();
+  private static final AnnotationSpec ANNOTATION_SPEC =
+    AnnotationSpec.builder(ClassName.OBJECT).build();
 
   protected <E extends Enum<E>> E generic(E[] values) {
     return values[0];

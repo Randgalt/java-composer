@@ -43,11 +43,11 @@ public class AnnotatedTypeNameTest {
   public @interface TypeUseAnnotation {}
 
 
-  @Test(expected=NullPointerException.class) public void nullAnnotationArray() {
+  @Test(expected = NullPointerException.class) public void nullAnnotationArray() {
     TypeName.BOOLEAN.annotated((AnnotationSpec[]) null);
   }
 
-  @Test(expected=NullPointerException.class) public void nullAnnotationList() {
+  @Test(expected = NullPointerException.class) public void nullAnnotationList() {
     TypeName.DOUBLE.annotated((List<AnnotationSpec>) null);
   }
 

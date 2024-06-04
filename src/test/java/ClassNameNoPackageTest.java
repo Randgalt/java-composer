@@ -23,8 +23,8 @@ import static com.google.common.truth.Truth.assertThat;
  * Since it is impossible to import classes from the default package into other
  * modules, this test must live in this package.
  */
-public final class ClassNameNoPackageTest
-{
+public final class ClassNameNoPackageTest {
+
   @Test public void shouldSupportClassInDefaultPackage() {
     ClassName className = ClassName.get(ClassNameNoPackageTest.class);
     assertThat(className.packageName()).isEqualTo("");
