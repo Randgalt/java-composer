@@ -35,6 +35,7 @@ import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -96,7 +97,7 @@ public class TypeName {
   private String cachedString;
 
   private TypeName(String keyword) {
-    this(keyword, new ArrayList<>());
+    this(keyword, Collections.emptyList());
   }
 
   private TypeName(String keyword, List<AnnotationSpec> annotations) {
