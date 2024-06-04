@@ -486,4 +486,102 @@ public final class MethodSpecTest {
     return CodeBlock.builder().addNamed(format, args).build();
   }
 
+  @Test public void ensureSwitchBlockFunctionality() {
+    CodeBlock cb1 = CodeBlock.builder()
+    .addStatement("result = $S", "domestic animal")
+    .addStatement("break")
+    .build();
+
+    CodeBlock cb2 = CodeBlock.builder()
+    .addStatement("result = $S", "wild animal")
+    .addStatement("break")
+    .build();
+
+    CodeBlock cb3 = CodeBlock.builder()
+    .addStatement("result = $S", "unknown animal")
+    .addStatement("break")
+    .build();
+
+    MethodSpec method = MethodSpec.methodBuilder("method")
+    .addModifiers(Modifier.PUBLIC)
+    .addParameter(ParameterSpec.builder(String.class, "animal").build())
+    .returns(String.class)
+    .addStatement("$T result", String.class)
+    .beginSwitchStatement("animal")
+    .addSwitchCase(true, "$S", "DOG")
+    .addSwitchCase(false, "$S", "CAT")
+    .addCode(cb1)
+    .addSwitchCase(false, CodeBlock.of("$S", "TIGER"))
+    .addCode(cb2)
+    .addDefaultCase()
+    .addCode(cb3)
+    .endSwitchStatement(false)
+    .addStatement("return result")
+    .build();
+
+    assertThat(method.toString()).isEqualTo(
+      "public java.lang.String method(java.lang.String animal) {\n"
+      +"  java.lang.String result;\n"
+      +"  switch (animal) {\n"
+      +"    case \"DOG\":\n"
+      +"    case \"CAT\":\n"
+      +"      result = \"domestic animal\";\n"
+      +"      break;\n"
+      +"    case \"TIGER\":\n"
+      +"      result = \"wild animal\";\n"
+      +"      break;\n"
+      +"    default:\n"
+      +"      result = \"unknown animal\";\n"
+      +"      break;\n"
+      +"  }\n"
+      +"  return result;\n"
+      +"}\n"
+    );
+  }
+
+  @Test public void ensureExtendedSwitchExpressionFunctionality() {
+    // Assume an enum named month is defined, which contains every month of the year
+    MethodSpec method = MethodSpec.methodBuilder("method")
+    .addModifiers(Modifier.PUBLIC)
+    .addParameter(ParameterSpec.builder(String.class, "month").build())
+    .returns(String.class)
+    .addCode("$T season = ", String.class)
+    .beginSwitchStatement(CodeBlock.of("month"))
+    .addExtendedSwitchCase(CodeBlock.of("$S;","WINTER"), "$L, $L, $L", "DECEMBER", "JANUARY", "FEBRUARY")
+    .addExtendedSwitchCase(CodeBlock.of("$S;","SPRING"), "$L, $L, $L", "MARCH", "APRIL", "MAY")
+    .addExtendedSwitchCase(CodeBlock.of("$S;","SUMMER"), CodeBlock.of("$L, $L, $L", "JUNE", "JULY", "AUGUST"))
+    .addExtendedDefaultCase(CodeBlock.of("$S;","AUTUMN"))
+    .endSwitchStatement(true)
+    .addStatement("return season")
+    .build();
+
+    assertThat(method.toString()).isEqualTo(
+      "public java.lang.String method(java.lang.String month) {\n"
+      +"  java.lang.String season = switch (month) {\n"
+      +"    case DECEMBER, JANUARY, FEBRUARY -> \"WINTER\";\n"
+      +"    case MARCH, APRIL, MAY -> \"SPRING\";\n"
+      +"    case JUNE, JULY, AUGUST -> \"SUMMER\";\n"
+      +"    default -> \"AUTUMN\";\n"
+      +"  }\n"
+      +"  return season;\n"
+      +"}\n"
+    );
+  }
+
+  @Test public void bracesInExtendedSwitch() {
+    MethodSpec method = MethodSpec.methodBuilder("method")
+    .addExtendedSwitchCase(CodeBlock.of("x++; y++;"),"increase")
+    // Semicolumns ommited deliberately to ensure that multiline codeblocks are included in braces
+    .addExtendedSwitchCase(CodeBlock.of("x--\n y--"),"decrease")
+    .build();
+
+    assertThat(method.toString()).isEqualTo(
+      "void method() {\n"
+      +"  case increase -> { x++; y++; }\n"
+      +"  case decrease -> { x--\n"
+      +"   y-- }\n"
+      +"}\n"
+    );
+  }
+
 }

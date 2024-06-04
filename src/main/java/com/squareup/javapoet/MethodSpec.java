@@ -522,6 +522,109 @@ public final class MethodSpec {
       return endControlFlow("$L", codeBlock);
     }
 
+    /**
+     * Starts a switch statement. To start a switch expression it should be
+     * used with {@link #addCode(String, Object...) addCode}.
+     * @param expressionFormat the format of the expression that will be calculated
+     * by the switch statement. It should not include parentheses, braces or 
+     * newline characters
+     * @param args the values to be placed instead of the format's placeholders
+    */
+    public Builder beginSwitchStatement(String expressionFormat, Object... args) {
+      code.beginSwitchStatement(expressionFormat, args);
+      return this;
+    }
+
+    /**
+     * Starts a switch statement. To start a switch expression it should be
+     * used with {@link #addCode(String, Object...) addCode}.
+     * @param codeblock the expression that will be calculated
+     * by the switch statement. It should not include parentheses, braces or 
+     * newline characters
+    */
+    public Builder beginSwitchStatement (CodeBlock codeblock) {
+      code.beginSwitchStatement(codeblock);
+      return this;
+    }
+
+    /**
+     * Adds a case to a switch statement or expression.
+     * @param isFirstCase indicates whether the case is the first of the switch
+     * statement. Necessary to apply proper indentation
+     * @param valueFormat the value that the calculated expression will be compared
+     * against
+     * @param args the values to be placed instead of the format's placeholders
+     */
+    public Builder addSwitchCase(Boolean isFirstCase, String valueFormat, Object... args) {
+      code.addSwitchCase(isFirstCase, valueFormat, args);
+      return this;
+    }
+
+    /**
+     * Adds a case to a switch statement or expression.
+     * @param isFirstCase indicates whether the case is the first of the switch
+     * statement. Necessary to apply proper indentation
+     * @param codeblock the value that the calculated expression will be compared
+     * against
+     */
+    public Builder addSwitchCase(Boolean isFirstCase, CodeBlock codeblock) {
+      code.addSwitchCase(isFirstCase, codeblock);
+      return this;
+    }
+
+    /**
+     * Adds a case to an extended switch statement or expression.
+     * @param body the code that needs to be executed if the case is true.
+     * @param valueFormat the value(-s) that the calculated expression will be compared
+     * against
+     * @param args the values to be placed instead of the format's placeholders
+     */
+    public Builder addExtendedSwitchCase(CodeBlock body,
+     String valueFormat, Object... args) {
+      code.addExtendedSwitchCase(body, valueFormat, args);
+      return this;
+
+    }
+
+    /**
+     * Adds a case to an extended switch statement or expression.
+     * @param body the code that needs to be executed if the case is true.
+     * @param value the value(-s) that the calculated expression will be compared
+     * against
+     */
+    public Builder addExtendedSwitchCase(CodeBlock body, CodeBlock value) {
+      code.addExtendedSwitchCase(body, value);
+      return this;
+    }
+
+    /**
+     * Adds the default case to a switch statement or expression 
+     */
+    public Builder addDefaultCase() {
+      code.addDefaultCase();
+      return this;
+    }
+
+    /**
+     * Adds the default case to an enhanced switch statement or expression
+     * @param body the code that needs to be executed if none of the cases
+     *  are true.
+     */
+    public Builder addExtendedDefaultCase (CodeBlock body) {
+      code.addExtendedDefaultCase(body);
+      return this;
+    }
+
+    /**
+     * Closes the switch statement or expression
+     * @param isExtended whether the switch block to close is an extended switch
+     * block or not. Necessary to implement proper indentation
+     */
+    public Builder endSwitchStatement(Boolean isExtended) {
+      code.endSwitchStatement(isExtended);
+      return this;
+    }
+
     public Builder addStatement(String format, Object... args) {
       code.addStatement(format, args);
       return this;
