@@ -285,16 +285,14 @@ public final class JavaFileTest {
         + "}\n");
   }
 
-  @Test
-  public void recordNoField() {
+  @Test public void recordNoField() {
       String source = JavaFile.builder("com.squareup.tacos", TypeSpec.recordBuilder("Taco").build())
               .skipJavaLangImports(true).build().toString();
       assertThat(source).isEqualTo(
               "" + "package com.squareup.tacos;\n" + "\n" + "record Taco() {\n" + "}\n" + "");
   }
 
-  @Test
-  public void recordTwoField() {
+  @Test public void recordTwoField() {
       String source = JavaFile
               .builder("com.squareup.tacos",
                       TypeSpec.recordBuilder("Taco")
@@ -305,8 +303,7 @@ public final class JavaFileTest {
               + "record Taco(String name, Integer code) {\n" + "}\n" + "");
   }
 
-  @Test
-  public void recordTwoAnnotatedFields() {
+  @Test public void recordTwoAnnotatedFields() {
     AnnotationSpec annotationSpec = AnnotationSpec.builder(ClassName.get("com.squareup.tacos", "Spicy")).build();
     String source = JavaFile
             .builder("com.squareup.tacos",
@@ -930,8 +927,7 @@ public final class JavaFileTest {
             .build());
   }
 
-  @Test
-  public void avoidClashes_parentChild_superclass_type() {
+  @Test public void avoidClashes_parentChild_superclass_type() {
     String source = JavaFile.builder("com.squareup.javapoet",
         childTypeBuilder().superclass(Parent.class).build())
         .build()
@@ -951,8 +947,7 @@ public final class JavaFileTest {
         + "}\n");
   }
 
-  @Test
-  public void avoidClashes_parentChild_superclass_typeMirror() {
+  @Test public void avoidClashes_parentChild_superclass_typeMirror() {
     String source = JavaFile.builder("com.squareup.javapoet",
         childTypeBuilder().superclass(getElement(Parent.class).asType()).build())
         .build()
@@ -972,8 +967,7 @@ public final class JavaFileTest {
         + "}\n");
   }
 
-  @Test
-  public void avoidClashes_parentChild_superinterface_type() {
+  @Test public void avoidClashes_parentChild_superinterface_type() {
     String source = JavaFile.builder("com.squareup.javapoet",
         childTypeBuilder().addSuperinterface(ParentInterface.class).build())
         .build()
@@ -994,8 +988,7 @@ public final class JavaFileTest {
         + "}\n");
   }
 
-  @Test
-  public void avoidClashes_parentChild_superinterface_typeMirror() {
+  @Test public void avoidClashes_parentChild_superinterface_typeMirror() {
     String source = JavaFile.builder("com.squareup.javapoet",
         childTypeBuilder().addSuperinterface(getElement(ParentInterface.class).asType()).build())
         .build()
@@ -1031,8 +1024,7 @@ public final class JavaFileTest {
   }
 
   // Regression test for case raised here: https://github.com/square/javapoet/issues/77#issuecomment-519972404
-  @Test
-  public void avoidClashes_mapEntry() {
+  @Test public void avoidClashes_mapEntry() {
     String source = JavaFile.builder("com.squareup.javapoet",
         TypeSpec.classBuilder("MapType")
             .addMethod(MethodSpec.methodBuilder("optionalString")
