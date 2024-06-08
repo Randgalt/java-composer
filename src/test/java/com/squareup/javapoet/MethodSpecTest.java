@@ -36,6 +36,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Target;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -98,6 +99,40 @@ public final class MethodSpecTest {
     } catch (IllegalArgumentException expected) {
       assertThat(expected).hasMessageThat().isEqualTo("exceptions == null");
     }
+  }
+
+  @Test public void exceptionsAsListAddition() {
+    ClassName ioException = ClassName.get(IOException.class);
+    ClassName timeoutException = ClassName.get(TimeoutException.class);
+    MethodSpec methodSpec = MethodSpec.methodBuilder("doSomething").addExceptions(List.of(
+      ioException,
+      timeoutException
+    )).build();
+    assertThat(methodSpec.exceptions).isEqualTo(Arrays.asList(ioException, timeoutException));
+  }
+
+  @Test public void commentAddition() {
+    MethodSpec methodSpec = MethodSpec.methodBuilder("doSomething")
+    .addComment("this is a comment").build();
+    assertThat(methodSpec.toString()).isEqualTo(""
+      + "void doSomething() {\n"
+      + "  // this is a comment\n"
+      + "}\n"
+    );
+  }
+
+  @Test public void namedCodeAddition() {
+    Map<String, Object> map = new LinkedHashMap<>();
+    map.put("food", "tacos");
+    map.put("count", 3);
+    MethodSpec methodSpec = MethodSpec.methodBuilder("doSomething")
+    .addNamedCode("I ate $count:L $food:L", map).build();
+
+    assertThat(methodSpec.toString()).isEqualTo(""
+      + "void doSomething() {\n"
+      + "  I ate 3 tacos\n"
+      + "}\n"
+    );
   }
 
   @Target(ElementType.PARAMETER)
@@ -419,6 +454,17 @@ public final class MethodSpecTest {
 
     builder.typeVariables.remove(1);
     assertThat(builder.build().typeVariables).containsExactly(t);
+  }
+
+  @Test public void typeVariableAsListAddition() {
+    TypeVariableName t = TypeVariableName.get("T");
+    TypeVariableName v = TypeVariableName.get("V");
+    MethodSpec methodSpec = MethodSpec.methodBuilder("foo")
+            .addTypeVariables(List.of(t, v)).build();
+
+    assertThat(methodSpec.toString()).isEqualTo(""
+      + "<T, V> void foo() {\n}\n"
+    );
   }
 
   @Test public void ensureTrailingNewline() {

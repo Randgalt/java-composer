@@ -204,4 +204,12 @@ public final class LineWrapperTest {
     lineWrapper.close();
     assertThat(out.toString()).isEqualTo("abcde fghi\nklmnopq\nrs\n    tuvwxyz1");
   }
+
+  @Test public void appendSubString() throws Exception {
+    StringBuffer out = new StringBuffer();
+    LineWrapper.RecordingAppendable appendable = new LineWrapper.RecordingAppendable(out);
+    String str = "append the second half of this string";
+    appendable.append(str, str.length() / 2, str.length());
+    assertThat(out.toString()).isEqualTo("half of this string");
+  }
 }
