@@ -30,6 +30,7 @@ import java.util.Map;
 import static com.squareup.javapoet.Util.checkArgument;
 
 public final class WildcardTypeName extends TypeName {
+  /** the type bounds of the WildCardType */
   public final List<TypeName> upperBounds;
   public final List<TypeName> lowerBounds;
 

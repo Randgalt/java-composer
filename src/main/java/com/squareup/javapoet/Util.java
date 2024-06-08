@@ -37,6 +37,12 @@ final class Util {
   private Util() {
   }
 
+  /**
+   * Similar to {@link #immutableMap immutableMap}, but used
+   * for maps that contain lists for values.
+   * @param multimap a map with list values.
+   * @return the immutable view of the {@code map}.
+   */
   static <K, V> Map<K, List<V>> immutableMultimap(Map<K, List<V>> multimap) {
     LinkedHashMap<K, List<V>> result = new LinkedHashMap<>();
     for (Map.Entry<K, List<V>> entry : multimap.entrySet()) {
@@ -46,31 +52,84 @@ final class Util {
     return Collections.unmodifiableMap(result);
   }
 
+  /**
+   * Retrieves an immutable view of a given map.
+   * @param map a map.
+   * @return the immutable view of the {@code map}.
+   */
   static <K, V> Map<K, V> immutableMap(Map<K, V> map) {
     return Collections.unmodifiableMap(new LinkedHashMap<>(map));
   }
 
+  /**
+   * Verifies a given condition as satisfied and
+   * throws an exception otherwise, based on a
+   * given error message.<br>
+   * Should be preferred for argument checking.<br>
+   * Check {@link #checkState checkState} for state
+   * checking.
+   * @param condition the condition to be checked.
+   * @param format the format that should be used for the exception message.
+   * @param args the values that should be placed in the holders of the format.
+   */
   static void checkArgument(boolean condition, String format, Object... args) {
     if (!condition) throw new IllegalArgumentException(String.format(format, args));
   }
 
+  /**
+   * Verifies a reference as not null and throws
+   * an exception otherwise, based on a
+   * given error message.
+   * @param reference the reference to be checked.
+   * @param format the format that should be used for the exception message.
+   * @param args the values that should be placed in the holders of the format.
+   * @return the (not null) reference.
+   */
   static <T> T checkNotNull(T reference, String format, Object... args) {
     if (reference == null) throw new NullPointerException(String.format(format, args));
     return reference;
   }
 
+  /**
+   * Similar to {@link #checkArgument checkArgument},
+   * but should be preferred for cases were the state
+   * of an execution is to be checked.
+   * @param condition the condition to be checked.
+   * @param format the format that should be used for the exception message.
+   * @param args the values that should be placed in the holders of the format.
+   */
   static void checkState(boolean condition, String format, Object... args) {
     if (!condition) throw new IllegalStateException(String.format(format, args));
   }
 
+  /**
+   * Creates an immutable list from a specified collection.
+   * @param collection a collection of an unspecified type
+   * that can be transformed to a list.
+   * @return an immutable list that contains the same elements.
+   */
   static <T> List<T> immutableList(Collection<T> collection) {
     return Collections.unmodifiableList(new ArrayList<>(collection));
   }
 
+  /**
+   * Similar to {@link #immutableList immutableList},
+   * but for sets.
+   * @param set a collection of an unspecified type
+   * that can be transformed to a set.
+   * @return an immutable set that contains the same elements.
+   */
   static <T> Set<T> immutableSet(Collection<T> set) {
     return Collections.unmodifiableSet(new LinkedHashSet<>(set));
   }
 
+  /**
+   * Merges two sets and returns the result.
+   * @param a a set.
+   * @param b a second set we want to merge into a.
+   * @return a new set containing the elements of
+   * both sets.
+   */
   static <T> Set<T> union(Set<T> a, Set<T> b) {
     Set<T> result = new LinkedHashSet<>();
     result.addAll(a);
@@ -78,6 +137,13 @@ final class Util {
     return result;
   }
 
+  /**
+   * Checks if a set of modifiers contains
+   * <b>exactly one<b> modifier from
+   * an array of modifiers.
+   * @param modifiers the set to be checked for exclusivity.
+   * @param mutuallyExclusive the modifiers.
+   */
   static void requireExactlyOneOf(Set<Modifier> modifiers, Modifier... mutuallyExclusive) {
     int count = 0;
     for (Modifier modifier : mutuallyExclusive) {

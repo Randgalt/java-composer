@@ -47,6 +47,7 @@ public final class ParameterSpec {
     this.javadoc = builder.javadoc.build();
   }
 
+  /** Returns true if the ParameterSpec has {@code modifier}. */
   public boolean hasModifier(Modifier modifier) {
     return modifiers.contains(modifier);
   }
@@ -84,6 +85,7 @@ public final class ParameterSpec {
     }
   }
 
+  /** Builds and returns a ParameterSpec based on a given {@code element}. */
   public static ParameterSpec get(VariableElement element) {
     checkArgument(element.getKind().equals(ElementKind.PARAMETER), "element is not a parameter");
 
@@ -96,6 +98,7 @@ public final class ParameterSpec {
         .build();
   }
 
+  /** Collects and returns a List of the parameters of a given {@code method}. */
   static List<ParameterSpec> parametersOf(ExecutableElement method) {
     List<ParameterSpec> result = new ArrayList<>();
     for (VariableElement parameter : method.getParameters()) {
@@ -104,6 +107,7 @@ public final class ParameterSpec {
     return result;
   }
 
+  /** Returns true if {@code name} is a valid parameter name, based on the given version. */
   private static boolean isValidParameterName(String name) {
     // Allow "this" for explicit receiver parameters
     // See https://docs.oracle.com/javase/specs/jls/se8/html/jls-8.html#jls-8.4.1.
@@ -113,6 +117,10 @@ public final class ParameterSpec {
     return name.equals("this") || SourceVersion.isName(name);
   }
 
+  /**
+   * Creates and returns a ParameterSpec Builder based
+   * on a {@code type}, a {@code name} and some {@code modifiers}.
+   */
   public static Builder builder(TypeName type, String name, Modifier... modifiers) {
     checkNotNull(type, "type == null");
     checkArgument(isValidParameterName(name), "not a valid name: %s", name);
@@ -124,6 +132,11 @@ public final class ParameterSpec {
     return builder(TypeName.get(type), name, modifiers);
   }
 
+  /**
+   * Creates and returns a ParameterSpec Builder
+   * based on <b>this</b> ParameterSpec's {@code type},
+   * {@code name}, {@code annotations} and {@code modifiers}.
+  */
   public Builder toBuilder() {
     return toBuilder(type, name);
   }

@@ -76,11 +76,24 @@ public final class MethodSpec {
     this.code = code;
   }
 
+  /**
+   * Checks whether or not the last parameter is an array
+   * @param parameters the parameters of the {@link MethodSpec}
+   * @return true if the last parameter is an array, false otherwise
+   */
   private boolean lastParameterIsArray(List<ParameterSpec> parameters) {
     return !parameters.isEmpty()
         && TypeName.asArray((parameters.get(parameters.size() - 1).type)) != null;
   }
 
+  /**
+   * Emits the method using the given code writer.
+   * @param codeWriter the code writer used to emit the method
+   * @param enclosingName the class or interface that contains the method being generated.
+   * Typically used when generating constructors, or methods that belong to inner classes.
+   * @param implicitModifiers the set of the method's implicit modifiers
+   * @throws IOException if an I/O error occurs
+   */
   void emit(CodeWriter codeWriter, String enclosingName, Set<Modifier> implicitModifiers)
       throws IOException {
     codeWriter.emitJavadoc(javadocWithParameters());
@@ -141,6 +154,11 @@ public final class MethodSpec {
     codeWriter.popTypeVariables(typeVariables);
   }
 
+  /**
+   * Builds and returns a Javadoc comment that contains the annotation
+   * and the comment for each parameter of the {@link MethodSpec}.
+   * @return the CodeBlock representing the Javadoc comment
+   */
   private CodeBlock javadocWithParameters() {
     CodeBlock.Builder builder = javadoc.toBuilder();
     boolean emitTagNewline = true;
@@ -155,10 +173,19 @@ public final class MethodSpec {
     return builder.build();
   }
 
+  /**
+   * Checks if the method has the specified modifier.
+   * @param modifier the modifier to search for
+   * @return true if the modifier is found, false otherwise
+   */
   public boolean hasModifier(Modifier modifier) {
     return modifiers.contains(modifier);
   }
 
+  /**
+   * Checks if the method is a constructor
+   * @return true if the method is a constructor, false otherwise
+   */
   public boolean isConstructor() {
     return name.equals(CONSTRUCTOR);
   }
@@ -185,10 +212,19 @@ public final class MethodSpec {
     }
   }
 
+  /**
+   * Creates and returns the builder of a {@link MethodSpec}
+   * @param name the name of the method
+   * @return the builder of the MethodSpec
+   */
   public static Builder methodBuilder(String name) {
     return new Builder(name);
   }
 
+  /**
+   * Creates and returns the builder of a constructor
+   * @return the builder of the constructor
+   */
   public static Builder constructorBuilder() {
     return new Builder(CONSTRUCTOR);
   }
@@ -277,6 +313,10 @@ public final class MethodSpec {
     return builder;
   }
 
+  /**
+   * Creates a new builder, using the values of the existing {@link MethodSpec}.
+   * @return the builder of the MethodSpec
+   */
   public Builder toBuilder() {
     Builder builder = new Builder(name);
     builder.javadoc.add(javadoc);
@@ -310,7 +350,13 @@ public final class MethodSpec {
     private Builder(String name) {
       setName(name);
     }
-
+  
+    /**
+     * Validates and sets the name of the method. It also initializes the
+     * method's return type to void, or null if the method is a constructor.
+     * @param name the name of the method
+     * @return this builder
+     */
     public Builder setName(String name) {
       checkNotNull(name, "name == null");
       checkArgument(name.equals(CONSTRUCTOR) || SourceVersion.isName(name),
@@ -319,17 +365,33 @@ public final class MethodSpec {
       this.returnType = name.equals(CONSTRUCTOR) ? null : TypeName.VOID;
       return this;
     }
-
+  
+    /**
+     * Adds a Javadoc comment to the method.
+     * @param format the string format of the Javadoc comment
+     * @param args the values to replace the format's placeholders
+     * @return this builder
+     */
     public Builder addJavadoc(String format, Object... args) {
       javadoc.add(format, args);
       return this;
     }
-
+  
+    /**
+     * Adds a Javadoc comment to the method.
+     * @param block the code block that represents the Javadoc comment
+     * @return this builder
+     */
     public Builder addJavadoc(CodeBlock block) {
       javadoc.add(block);
       return this;
     }
-
+  
+    /**
+     * Adds the annotations to the method.
+     * @param annotationSpecs the annotations to be added
+     * @return this builder
+     */
     public Builder addAnnotations(Iterable<AnnotationSpec> annotationSpecs) {
       checkArgument(annotationSpecs != null, "annotationSpecs == null");
       for (AnnotationSpec annotationSpec : annotationSpecs) {
@@ -337,27 +399,51 @@ public final class MethodSpec {
       }
       return this;
     }
-
+  
+    /**
+     * Adds an annotation to the method.
+     * @param annotationSpec the annotation to be added
+     * @return this builder
+     */
     public Builder addAnnotation(AnnotationSpec annotationSpec) {
       this.annotations.add(annotationSpec);
       return this;
     }
 
+    /**
+     * Used to add a single annotation to the method.
+     * @param annotation the ClassName representing the annotation's class
+     * @return this builder
+     */
     public Builder addAnnotation(ClassName annotation) {
       this.annotations.add(AnnotationSpec.builder(annotation).build());
       return this;
     }
-
+  
+    /**
+     * Used to add a single annotation to the method.
+     * @param annotation the Class of the annotation
+     * @return this builder
+     */
     public Builder addAnnotation(Class<?> annotation) {
       return addAnnotation(ClassName.get(annotation));
     }
-
+    /**
+     * Adds the modifiers to the method.
+     * @param modifiers the modifiers to be added
+     * @return this builder
+     */
     public Builder addModifiers(Modifier... modifiers) {
       checkNotNull(modifiers, "modifiers == null");
       Collections.addAll(this.modifiers, modifiers);
       return this;
     }
-
+  
+    /**
+     * Adds the modifiers to the method.
+     * @param modifiers the modifiers to be added
+     * @return this builder
+     */
     public Builder addModifiers(Iterable<Modifier> modifiers) {
       checkNotNull(modifiers, "modifiers == null");
       for (Modifier modifier : modifiers) {
@@ -365,7 +451,11 @@ public final class MethodSpec {
       }
       return this;
     }
-
+    /**
+     * Adds type variables, such as <T, V>, to the method declaration. 
+     * @param typeVariables the type variables to be added
+     * @return this builder
+     */
     public Builder addTypeVariables(Iterable<TypeVariableName> typeVariables) {
       checkArgument(typeVariables != null, "typeVariables == null");
       for (TypeVariableName typeVariable : typeVariables) {
@@ -373,22 +463,42 @@ public final class MethodSpec {
       }
       return this;
     }
-
+  
+    /**
+     * Adds a type variable, such as <T>, to the method declaration.
+     * @param typeVariable the type variable to be added
+     * @return this builder
+     */
     public Builder addTypeVariable(TypeVariableName typeVariable) {
       typeVariables.add(typeVariable);
       return this;
     }
-
+  
+    /**
+     * Adds the method's return type.
+     * @param returnType the method's return type
+     * @return this builder
+     */
     public Builder returns(TypeName returnType) {
       checkState(!name.equals(CONSTRUCTOR), "constructor cannot have return type.");
       this.returnType = returnType;
       return this;
     }
-
+  
+    /**
+     * Adds the method's return type.
+     * @param returnType the method's return type
+     * @return this builder
+     */
     public Builder returns(Type returnType) {
       return returns(TypeName.get(returnType));
     }
-
+  
+    /**
+     * Adds parameters to the method.
+     * @param parameterSpecs the parameters to be added
+     * @return this builder
+     */
     public Builder addParameters(Iterable<ParameterSpec> parameterSpecs) {
       checkArgument(parameterSpecs != null, "parameterSpecs == null");
       for (ParameterSpec parameterSpec : parameterSpecs) {
@@ -396,29 +506,62 @@ public final class MethodSpec {
       }
       return this;
     }
-
+  
+    /**
+     * Adds a single parameter to the method.
+     * @param parameterSpec the parameter to be added
+     * @return this builder 
+     */
     public Builder addParameter(ParameterSpec parameterSpec) {
       this.parameters.add(parameterSpec);
       return this;
     }
-
+  
+    /**
+     * Adds a single parameter to the method.
+     * @param type the type of the parameter
+     * @param name the name of the parameter
+     * @param modifiers the parameter's modifiers
+     * @return this builder
+     */
     public Builder addParameter(TypeName type, String name, Modifier... modifiers) {
       return addParameter(ParameterSpec.builder(type, name, modifiers).build());
     }
-
+  
+    /**
+     * Adds a single parameter to the method.
+     * @param type the type of the parameter
+     * @param name the name of the parameter
+     * @param modifiers the parameter's modifiers
+     * @return this builder
+     */
     public Builder addParameter(Type type, String name, Modifier... modifiers) {
       return addParameter(TypeName.get(type), name, modifiers);
     }
 
+    /**
+     * States whether or not the method has a varargs parameter, such as args...
+     * @return this builder
+     */
     public Builder varargs() {
       return varargs(true);
     }
-
+  
+    /**
+     * States whether or not the method has a varargs parameter, such as args...
+     * @param varargs true if the method has a varargs parameter, false otherwise 
+     * @return this builder
+     */
     public Builder varargs(boolean varargs) {
       this.varargs = varargs;
       return this;
     }
-
+  
+    /**
+     * Adds the Exceptions in the method declaration. 
+     * @param exceptions the names of the classes of the Exceptions
+     * @return this builder
+     */
     public Builder addExceptions(Iterable<? extends TypeName> exceptions) {
       checkArgument(exceptions != null, "exceptions == null");
       for (TypeName exception : exceptions) {
@@ -427,39 +570,84 @@ public final class MethodSpec {
       return this;
     }
 
+    /**
+     * Adds an Exception to the method declaration.
+     * @param exception the name of the class of the Exception
+     * @return this builder
+     */
     public Builder addException(TypeName exception) {
       this.exceptions.add(exception);
       return this;
     }
-
+  
+    /**
+     * Adds an Exception to the method declaration.
+     * @param exception the type of the Exception
+     * @return this builder 
+     */
     public Builder addException(Type exception) {
       return addException(TypeName.get(exception));
     }
-
+    
+    /**
+     * Adds the body of the method.
+     * @param format the string format of the method's body
+     * @param args the values to replace the format's placeholders
+     * @return this builder
+     */
     public Builder addCode(String format, Object... args) {
       code.add(format, args);
       return this;
     }
-
+    
+    /**
+     * Adds the body of the method.
+     * @param format the string format of the method's body
+     * @param args the values to replace the named arguments used as
+     * placeholders in the format
+     * @return this builder
+     */
     public Builder addNamedCode(String format, Map<String, ?> args) {
       code.addNamed(format, args);
       return this;
     }
 
+    /**
+     * Adds the body of the method.
+     * @param codeBlock the code block representing the body of the method
+     * @return this builder
+     */
     public Builder addCode(CodeBlock codeBlock) {
       code.add(codeBlock);
       return this;
     }
 
+    /**
+     * Adds a single-line comment to the method.
+     * @param format the string format of the comment
+     * @param args the values to replace the format's placeholders
+     * @return this builder 
+     */
     public Builder addComment(String format, Object... args) {
       code.add("// " + format + "\n", args);
       return this;
     }
-
+  
+    /**
+     * Used to specify the default value of an annotation member.
+     * @param format the string format of the default value
+     * @param args the value to replace the format's placeholders
+     * @return this builder
+     */
     public Builder defaultValue(String format, Object... args) {
       return defaultValue(CodeBlock.of(format, args));
     }
-
+    
+    /**
+     * Used to specify the default value of an annotation member.
+     * @param codeBlock the code block representing the default value
+     * @return this builder
+     */
     public Builder defaultValue(CodeBlock codeBlock) {
       checkState(this.defaultValue == null, "defaultValue was already set");
       this.defaultValue = checkNotNull(codeBlock, "codeBlock == null");
@@ -500,6 +688,10 @@ public final class MethodSpec {
       return nextControlFlow("$L", codeBlock);
     }
 
+    /**
+     * Ends the control flow
+     * @return this builder
+     */
     public Builder endControlFlow() {
       code.endControlFlow();
       return this;
@@ -521,17 +713,32 @@ public final class MethodSpec {
     public Builder endControlFlow(CodeBlock codeBlock) {
       return endControlFlow("$L", codeBlock);
     }
-
+  
+    /**
+     * Adds a statement to the body of the method.
+     * @param format the string format of the statement
+     * @param args the values to replace the placeholders of the format
+     * @return this builder
+     */
     public Builder addStatement(String format, Object... args) {
       code.addStatement(format, args);
       return this;
     }
-
+  
+    /**
+     * Adds a statement to the body of the method.
+     * @param codeBlock the code block that represents the statement
+     * @return this builder
+     */
     public Builder addStatement(CodeBlock codeBlock) {
       code.addStatement(codeBlock);
       return this;
     }
-
+  
+    /**
+     * Builds and returns an instance of {@link MethodSpec}
+     * @return the built MethodSpec
+     */
     public MethodSpec build() {
       return new MethodSpec(this);
     }

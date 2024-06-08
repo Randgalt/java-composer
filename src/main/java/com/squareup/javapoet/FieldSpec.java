@@ -49,10 +49,21 @@ public final class FieldSpec {
         : builder.initializer;
   }
 
+  /**
+   * Checks if this field has the modifier that is specified.
+   * @param modifier the modifier to check for
+   * @return true if the field has the modifier, false otherwise
+   */
   public boolean hasModifier(Modifier modifier) {
     return modifiers.contains(modifier);
   }
 
+  /**
+   * Uses the given CodeWriter to emit this field .
+   * @param codeWriter the code writer used to emit the field
+   * @param implicitModifiers the set of the field's implicit modifiers
+   * @throws IOException if an I/O error occurs
+   */
   void emit(CodeWriter codeWriter, Set<Modifier> implicitModifiers) throws IOException {
     codeWriter.emitJavadoc(javadoc);
     codeWriter.emitAnnotations(annotations, false);
@@ -87,6 +98,13 @@ public final class FieldSpec {
     }
   }
 
+  /**
+   * Returns a new builder for a {@link FieldSpec}.
+   * @param type the type of the field
+   * @param name the name of the field
+   * @param modifiers the modifiers to apply to the field
+   * @return a new FieldSpec builder
+   */
   public static Builder builder(TypeName type, String name, Modifier... modifiers) {
     checkNotNull(type, "type == null");
     checkArgument(SourceVersion.isName(name), "not a valid name: %s", name);
@@ -94,10 +112,22 @@ public final class FieldSpec {
         .addModifiers(modifiers);
   }
 
+  /**
+   * Returns a new builder for a FieldSpec.
+   * @param type the type of the field
+   * @param name the name of the field
+   * @param modifiers the modifiers to apply to the field
+   * @return a new FieldSpec builder
+   */
   public static Builder builder(Type type, String name, Modifier... modifiers) {
     return builder(TypeName.get(type), name, modifiers);
   }
 
+  /**
+   * Creates and returns a new builder using the values of an already
+   * existing FieldSpec
+   * @return the new builder
+   */
   public Builder toBuilder() {
     Builder builder = new Builder(type, name);
     builder.javadoc.add(javadoc);
@@ -122,16 +152,32 @@ public final class FieldSpec {
       this.name = name;
     }
 
+    /**
+     * Adds the Javadoc comment to the builder of the field.
+     * @param format the format of the Javadoc comment
+     * @param args the arguments to replace the format's placehoders
+     * @return this builder
+     */
     public Builder addJavadoc(String format, Object... args) {
       javadoc.add(format, args);
       return this;
     }
 
+    /**
+     * Adds the Javadoc comment to the builder of the field.
+     * @param block the body of the Javadoc comment
+     * @return this builder
+     */
     public Builder addJavadoc(CodeBlock block) {
       javadoc.add(block);
       return this;
     }
 
+    /**
+     * Adds the annotations to the builder of the FieldSpec.
+     * @param annotationSpecs the annotations to be added
+     * @return this builder
+     */
     public Builder addAnnotations(Iterable<AnnotationSpec> annotationSpecs) {
       checkArgument(annotationSpecs != null, "annotationSpecs == null");
       for (AnnotationSpec annotationSpec : annotationSpecs) {
@@ -140,35 +186,70 @@ public final class FieldSpec {
       return this;
     }
 
+    /**
+     * Used to add a single annotation to the builder of the FieldSpec.
+     * @param annotationSpec the annotation to be added
+     * @return this builder
+     */
     public Builder addAnnotation(AnnotationSpec annotationSpec) {
       this.annotations.add(annotationSpec);
       return this;
     }
 
+    /**
+     * Used to add a single annotation to the builder of the FieldSpec.
+     * @param annotation the ClassName representing the annotation's class
+     * @return this builder
+     */
     public Builder addAnnotation(ClassName annotation) {
       this.annotations.add(AnnotationSpec.builder(annotation).build());
       return this;
     }
 
+    /**
+     * Used to add a single annotation to the builder of the FieldSpec.
+     * @param annotation the Class of the annotation
+     * @return this builder
+     */
     public Builder addAnnotation(Class<?> annotation) {
       return addAnnotation(ClassName.get(annotation));
     }
 
+    /**
+     * Adds modifiers to the builder of the FieldSpec
+     * @param modifiers the modifiers to be added
+     * @return this builder
+     */
     public Builder addModifiers(Modifier... modifiers) {
       Collections.addAll(this.modifiers, modifiers);
       return this;
     }
 
+    /**
+     * Adds the initializer of the field
+     * @param format the format of the initializer
+     * @param args the arguments to replace the format's placeholders
+     * @return this builder
+     */
     public Builder initializer(String format, Object... args) {
       return initializer(CodeBlock.of(format, args));
     }
 
+    /**
+     * Adds the initializer of the field
+     * @param codeBlock the code block of the initializer
+     * @return this builder
+     */
     public Builder initializer(CodeBlock codeBlock) {
       checkState(this.initializer == null, "initializer was already set");
       this.initializer = checkNotNull(codeBlock, "codeBlock == null");
       return this;
     }
-
+    
+    /**
+     * Builds the FieldSpec instance
+     * @return the built FieldSpec
+     */
     public FieldSpec build() {
       return new FieldSpec(this);
     }
