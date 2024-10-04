@@ -3,9 +3,7 @@ package com.squareup.javapoet;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Set;
 
 import javax.lang.model.element.Modifier;
 import static com.squareup.javapoet.Util.checkArgument;
@@ -14,36 +12,42 @@ import static com.squareup.javapoet.Util.checkNotNull;;
 public class LambdaSpec {
 
     /**
-     * The available format modes a lambda function can have.
-     * {@code VISIBLE_TYPES} example: (int x, int y) -> x + y;
-     * {@code BODY_NEWLINE} example:
-     * (x, y) ->
-     * x + y;
-     * {@code BODY_NEWLINE} + {@code BODY_INDENT} example:
-     * (x, y) -> {
-     *  int z = 3; return x + y + z;
-     * }
+     * The characters that will be placed *before*
+     * the *arrow* of the lambda.
     */
-    public enum LambdaMode {
-        VISIBLE_TYPES,
-        BODY_INDENT,
-        BODY_NEWLINE
-    }
+    private final String beforeArrow;
 
     /** The inputs of the function. */
     private final List<ParameterSpec> inputs;
 
+    /**
+     * The characters that will be placed *before*
+     * the *body* of the lambda (and before the
+     * curly bracket in such cases).
+    */
+    private final String beforeBody;
+
     /** The body of the function. */
     private final CodeBlock body;
 
-    /** @see LambdaSpec.LambdaMode LambdaMode.*/
-    public Set<LambdaMode> modes;
+    /**
+     * The characters that will be placed *after*
+     * the *body* of the lambda (and after the
+     * curly bracket in such cases).
+    */
+    private final String afterBody;
+
+    /** The visibility status of the input parameters */
+    private boolean visibleTypes;
 
     private LambdaSpec(Builder builder) {
         this.inputs = checkNotNull(builder.inputs, "inputs == null");
         validateInputs(this.inputs);
         this.body = checkNotNull(builder.body, "body == null");
-        this.modes = checkNotNull(builder.modes, "modes == null");
+        this.beforeArrow = checkNotNull(builder.beforeArrow, "beforeArrow == null");
+        this.beforeBody = checkNotNull(builder.beforeBody, "beforeBody == null");
+        this.afterBody = checkNotNull(builder.afterBody, "afterBody == null");
+        this.visibleTypes = builder.visibleTypes;
     }
 
     /**
@@ -54,18 +58,7 @@ public class LambdaSpec {
      * @throws IOException
      */
     void emitInputs(CodeWriter codeWriter) throws IOException {
-        boolean emitTypes = false;
-
-        for (LambdaMode mode : this.modes) {
-            // handle all related modes the user specified.
-            // add cases when needed.
-            switch (mode) {
-                case VISIBLE_TYPES -> emitTypes = true;
-                default -> {continue;}
-            };
-        }
-
-        boolean placeParenthesis = inputs.size() > 1 || emitTypes || inputs.isEmpty();
+        boolean placeParenthesis = inputs.size() > 1 || visibleTypes || inputs.isEmpty();
 
         codeWriter.emit(placeParenthesis ? "(" : "");
 
@@ -73,7 +66,7 @@ public class LambdaSpec {
 
         // the inputs of the lambda (left side)
         for (ParameterSpec inputParameter : inputs) {
-            if (emitTypes) {
+            if (visibleTypes) {
                 codeWriter.emitAnnotations(inputParameter.annotations, true);
                 codeWriter.emitModifiers(inputParameter.modifiers);
                 codeWriter.emit(inputParameter.type.toString() + " ");
@@ -94,35 +87,13 @@ public class LambdaSpec {
      * @throws IOException
      */
     void emitBody(CodeWriter codeWriter) throws IOException {
-        boolean indented = false;
-        boolean newLine = false;
-        for (LambdaMode mode : this.modes) {
-            // handle all related modes the user specified.
-            // add cases when needed.
-            switch (mode) {
-                case BODY_INDENT -> indented = true;
-                case BODY_NEWLINE -> newLine = true;
-                default -> {continue;}
-            }
-        }
-
         String bodySide = this.body.toString();
 
         // true if the function has more than 1 statement in its body
         boolean multiStatementBody = bodySide.contains(";");
 
         codeWriter.emit(multiStatementBody ? "{" : "");
-
-        codeWriter.emit(newLine ? "\n" : "");
-        if (indented) {
-            codeWriter.indent();
-            codeWriter.emit(body);
-            codeWriter.unindent();
-        } else {
-            codeWriter.emit(body);
-        }
-        codeWriter.emit(newLine ? "\n" : "");
-
+        codeWriter.emit(body);
         codeWriter.emit(multiStatementBody ? "}" : "");
     }
 
@@ -142,8 +113,11 @@ public class LambdaSpec {
         try {
             CodeWriter codeWriter = new CodeWriter(out);
             emitInputs(codeWriter);
-            codeWriter.emit(" -> ");
+            codeWriter.emit(this.beforeArrow);
+            codeWriter.emit("->");
+            codeWriter.emit(this.beforeBody);
             emitBody(codeWriter);
+            codeWriter.emit(this.afterBody);
             return out.toString();
         } catch (IOException e) {
             throw new AssertionError();
@@ -189,14 +163,16 @@ public class LambdaSpec {
 
     Builder toBuilder(List<ParameterSpec> inputs, CodeBlock body) {
         Builder builder = new Builder(inputs, body);
-        builder.modes.addAll(modes);
         return builder;
     }
 
     public static final class Builder {
+        public String beforeArrow = " ";
         public List<ParameterSpec> inputs = new ArrayList<>();
+        public String beforeBody = " ";
         public CodeBlock body;
-        public Set<LambdaMode> modes = new LinkedHashSet<>();
+        public String afterBody = "";
+        public boolean visibleTypes;
 
         private Builder(List<ParameterSpec> inputs, CodeBlock body) {
             this.inputs = inputs;
@@ -221,9 +197,23 @@ public class LambdaSpec {
             return this;
         }
 
-        /** Adds a new format mode to the final lambda. */
-        public Builder addMode(LambdaMode... modes) {
-            Collections.addAll(this.modes, modes);
+        public Builder beforeArrow(String code) {
+            this.beforeArrow = code;
+            return this;
+        }
+
+        public Builder beforeBody(String code) {
+            this.beforeBody = code;
+            return this;
+        }
+
+        public Builder afterBody(String code) {
+            this.afterBody = code;
+            return this;
+        }
+
+        public Builder visibleTypes() {
+            this.visibleTypes = true;
             return this;
         }
 

@@ -7,7 +7,6 @@ import static org.junit.Assert.fail;
 
 import org.junit.Test;
 
-import com.squareup.javapoet.LambdaSpec.LambdaMode;
 
 public class LambdaSpecTest {
 
@@ -50,20 +49,20 @@ public class LambdaSpecTest {
         // lambda inputs
         ParameterSpec p1 = ParameterSpec.builder(TypeName.INT, "x").build();
         ParameterSpec p2 = ParameterSpec.builder(TypeName.DOUBLE, "y").build();
-    
+
         // lambda body that considers input values
         CodeBlock body1 = CodeBlock.of("int $3N = 3; return $1N + $2N + $3N;", "x", "y", "z");
-    
+
         // lambda body that does not consider input values
         CodeBlock body2 = CodeBlock.of("int $1N = 3; int $2N = 5; return $1N + $2N;", "x", "y");
 
         // lambdas of different nature
-        LambdaSpec lambda1 = LambdaSpec.builder(body1).addInput(p1, p2).addMode(LambdaMode.VISIBLE_TYPES).build();
+        LambdaSpec lambda1 = LambdaSpec.builder(body1).addInput(p1, p2).visibleTypes().build();
         LambdaSpec lambda2 = LambdaSpec.builder("x + y").addInput(p2).build();
         LambdaSpec lambda3 = LambdaSpec.builder(body2).build();
         LambdaSpec lambda4 = LambdaSpec.builder("5 + 7").build();
         LambdaSpec lambda5 = LambdaSpec.builder("method1(); method2();").build();
-        LambdaSpec lambda6 = LambdaSpec.builder("x + 5").addInput(p1).addMode(LambdaMode.VISIBLE_TYPES).build();
+        LambdaSpec lambda6 = LambdaSpec.builder("x + 5").addInput(p1).visibleTypes().build();
 
         MethodSpec method = MethodSpec.methodBuilder("method")
         .addCode("methodCall(")
@@ -92,13 +91,13 @@ public class LambdaSpecTest {
     @Test public void ensureCodeBlockCompatibility() {
         // lambda body that does not consider input values
         CodeBlock body = CodeBlock.of("int $1N = 3; int $2N = 5; return $1N + $2N;", "x", "y");
-    
+
         // lambda expression that does not consider input values
         CodeBlock body2 = CodeBlock.of("5 + 3");
-    
+
         LambdaSpec lambda1 = LambdaSpec.builder(body).build();
         LambdaSpec lambda2 = LambdaSpec.builder(body2).build();
-        LambdaSpec lambda3 = LambdaSpec.builder(body).addMode(LambdaMode.BODY_NEWLINE, LambdaMode.BODY_INDENT).build();
+        LambdaSpec lambda3 = LambdaSpec.builder(body).beforeBody("\n  ").build();
 
         CodeBlock codeWithLambda = CodeBlock.builder()
         .add("methodCall(")
@@ -107,22 +106,21 @@ public class LambdaSpecTest {
         .add("Producer<Integer> pr = ")
         .addLambda(lambda3)
         .build();
-    
+
         MethodSpec method = MethodSpec.methodBuilder("method")
         .addCode(codeWithLambda)
         .build();
 
         assertThat(method.toString()).isEqualTo(""
-          + "void method() {\n"
-          +  "  methodCall("
-          +  "() -> {int x = 3; int y = 5; return x + y;}, "
-          +   "() -> 5 + 3"
-          +  ");\n"
-          +  "  Producer<Integer> pr = () -> {\n"
-          +  "    int x = 3; int y = 5; return x + y;\n"
-          +  "  }\n"
-          + "}\n"
-        );
+        + "void method() {\n"
+        +  "  methodCall("
+        +  "() -> {int x = 3; int y = 5; return x + y;}, "
+        +   "() -> 5 + 3"
+        +  ");\n"
+        +  "  Producer<Integer> pr = () ->\n"
+        +  "    {int x = 3; int y = 5; return x + y;}\n"
+        +  "}\n"
+      );
     }
-    
+
 }
