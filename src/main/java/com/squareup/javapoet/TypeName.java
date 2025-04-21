@@ -67,6 +67,7 @@ import java.util.Map;
  * ParameterizedTypeName}, {@link TypeVariableName}, and {@link WildcardTypeName}.
  */
 public class TypeName {
+  /** All available primitive types of Java (+ void) */
   public static final TypeName VOID = new TypeName("void");
   public static final TypeName BOOLEAN = new TypeName("boolean");
   public static final TypeName BYTE = new TypeName("byte");
@@ -76,8 +77,9 @@ public class TypeName {
   public static final TypeName CHAR = new TypeName("char");
   public static final TypeName FLOAT = new TypeName("float");
   public static final TypeName DOUBLE = new TypeName("double");
-  public static final ClassName OBJECT = ClassName.get("java.lang", "Object");
 
+  /** All available wrapper/ boxed types of Java (+ Object and void) */
+  public static final ClassName OBJECT = ClassName.get("java.lang", "Object");
   private static final ClassName BOXED_VOID = ClassName.get("java.lang", "Void");
   private static final ClassName BOXED_BOOLEAN = ClassName.get("java.lang", "Boolean");
   private static final ClassName BOXED_BYTE = ClassName.get("java.lang", "Byte");
@@ -99,12 +101,13 @@ public class TypeName {
     this(keyword, new ArrayList<>());
   }
 
+  /** Creates a new TypeName instance named {@code keyword} with its {@code annotations} */
   private TypeName(String keyword, List<AnnotationSpec> annotations) {
     this.keyword = keyword;
     this.annotations = Util.immutableList(annotations);
   }
 
-  // Package-private constructor to prevent third-party subclasses.
+  /** Package-private constructor to prevent third-party subclasses. */
   TypeName(List<AnnotationSpec> annotations) {
     this(null, annotations);
   }
@@ -118,6 +121,11 @@ public class TypeName {
     return new TypeName(keyword, concatAnnotations(annotations));
   }
 
+  /**
+   * Returns a TypeName with no annotations.
+   * If <b>this</b> TypeName is not annotated,
+   * it returns <b>this</b> TypeName.
+  */
   public TypeName withoutAnnotations() {
     if (annotations.isEmpty()) {
       return this;
@@ -125,12 +133,17 @@ public class TypeName {
     return new TypeName(keyword);
   }
 
+  /**
+   * Given a list of {@code annotations}, returns a new one
+   * that is a union of the input list and this TypeName's annotations.
+   */
   protected final List<AnnotationSpec> concatAnnotations(List<AnnotationSpec> annotations) {
     List<AnnotationSpec> allAnnotations = new ArrayList<>(this.annotations);
     allAnnotations.addAll(annotations);
     return allAnnotations;
   }
 
+  /** Returns true if this TypeName has any annotations */
   public boolean isAnnotated() {
     return !annotations.isEmpty();
   }
