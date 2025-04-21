@@ -4,7 +4,7 @@
 
     <groupId>io.soabase.java-composer</groupId>
     <artifactId>java-composer</artifactId>
-    <version>1.1</version>
+    <version>1.2-SNAPSHOT</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -67,7 +67,7 @@
         <url>https://github.com/randgalt/java-composer</url>
         <connection>scm:git:https://github.com/randgalt/java-composer.git</connection>
         <developerConnection>scm:git:git@github.com:randgalt/java-composer.git</developerConnection>
-        <tag>java-composer-1.1</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <issueManagement>
