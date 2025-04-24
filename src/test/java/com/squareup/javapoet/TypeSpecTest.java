@@ -110,16 +110,18 @@ public final class TypeSpecTest {
   @Test public void sealedInterface() {
     TypeSpec taco = TypeSpec.interfaceBuilder("Taco")
         .addModifiers(Modifier.SEALED)
-        .addPermits(ClassName.get("bobo", "Baba"))
+        .addPermits(ClassName.get("bobo", "Baba")) // addPermits(TypeName)
+        .addPermits(List.of(ClassName.get("bobo", "Bibi"))) // addPermits(Iterable)
         .build();
     assertThat(toString(taco)).isEqualTo(""
         + "package com.squareup.tacos;\n"
         + "\n"
         + "import bobo.Baba;\n"
+        + "import bobo.Bibi;\n"
         + "\n"
-        + "sealed interface Taco permits Baba {\n"
+        + "sealed interface Taco permits Baba, Bibi {\n"
         + "}\n");
-    assertEquals(126258766, taco.hashCode()); // update expected number if source changes
+    assertEquals(691467292, taco.hashCode()); // update expected number if source changes
   }
 
   @Test public void disallowSealedMethods() {
@@ -2665,7 +2667,7 @@ public final class TypeSpecTest {
     builder.originatingElements.clear();
     assertThat(builder.build().originatingElements).isEmpty();
   }
-    
+
   @Test public void javadocWithTrailingLineDoesNotAddAnother() {
     TypeSpec spec = TypeSpec.classBuilder("Taco")
         .addJavadoc("Some doc with a newline\n")
