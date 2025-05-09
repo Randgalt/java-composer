@@ -415,6 +415,11 @@ public final class CodeBlock {
       return this;
     }
 
+    public Builder addLambda(LambdaSpec lambda) {
+      add(lambda.toString());
+      return this;
+    }
+
     public Builder indent() {
       this.formatParts.add("$>");
       return this;

@@ -466,6 +466,11 @@ public final class MethodSpec {
       return this;
     }
 
+    public Builder addLambda(LambdaSpec lambda) {
+      code.addLambda(lambda);
+      return this;
+    }
+
     /**
      * @param controlFlow the control flow construct and its code, such as "if (foo == 5)".
      * Shouldn't contain braces or newline characters.
