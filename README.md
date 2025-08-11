@@ -1,5 +1,6 @@
-[![Maven Build](https://github.com/Randgalt/java-composer/actions/workflows/ci.yml/badge.svg)](https://github.com/Randgalt/java-composer/actions/workflows/ci.yml)
-[![Maven Central](https://img.shields.io/maven-central/v/io.soabase.java-composer/java-composer.svg?sort=date)](https://search.maven.org/search?q=g:io.soabase.java-composer%20a:java-composer)
+# USE PALANTIR'S FORK OF JAVA POET INSTEAD - THIS REPOSITORY IS NOW DEPRECATED
+
+https://github.com/palantir/javapoet
 
 # Java Composer
 
