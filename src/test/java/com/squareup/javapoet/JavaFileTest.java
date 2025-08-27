@@ -310,7 +310,7 @@ public final class JavaFileTest {
     AnnotationSpec annotationSpec = AnnotationSpec.builder(ClassName.get("com.squareup.tacos", "Spicy")).build();
     String source = JavaFile
             .builder("com.squareup.tacos",
-                    TypeSpec.recordBuilder("Taco")
+                    TypeSpec.recordBuilder(ClassName.get("tacos", "Taco")) // use recordBuilder(ClassName)
                             .addField(FieldSpec.builder(String.class, "name")
                                     .addAnnotation(annotationSpec)
                                     .build())
