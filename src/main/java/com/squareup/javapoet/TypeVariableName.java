@@ -36,7 +36,7 @@ public final class TypeVariableName extends TypeName {
   public final List<TypeName> bounds;
 
   private TypeVariableName(String name, List<TypeName> bounds) {
-    this(name, bounds, new ArrayList<>());
+    this(name, bounds, Collections.emptyList());
   }
 
   private TypeVariableName(String name, List<TypeName> bounds, List<AnnotationSpec> annotations) {
