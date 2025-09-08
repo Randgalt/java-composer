@@ -169,6 +169,10 @@ public final class FieldSpec {
       return this;
     }
 
+    public Builder initializer(LambdaSpec lambda) {
+      return initializer(lambda.toString());
+    }
+
     public FieldSpec build() {
       return new FieldSpec(this);
     }
