@@ -482,7 +482,7 @@ public final class MethodSpecTest {
         "}\n");
   }
 
-  private static CodeBlock named(String format, Map<String, ?> args){
+  private static CodeBlock named(String format, Map<String, ?> args) {
     return CodeBlock.builder().addNamed(format, args).build();
   }
 
